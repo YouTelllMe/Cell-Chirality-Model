@@ -14,5 +14,3 @@ Notes: https://www.overleaf.com/read/xqqjsrdqwkcj
 
 ### X-side view
 ![XZ](https://github.com/YouTelllMe/Cell-Chirality-Visualization/assets/80024712/a0253db6-d769-45df-a760-1fa1282148ef)
-
-<img width="174" alt="Screen Shot 2023-06-17 at 11 40 32 PM" src="https://github.com/YouTelllMe/Cell-Chirality-Visualization/assets/80024712/52aef5dc-65b5-4953-b05c-8caa9b3c56cf">

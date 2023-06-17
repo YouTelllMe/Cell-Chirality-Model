@@ -36,13 +36,34 @@ def plot_euler(euler_df):
 def animate(euler_df):
     steps = len(euler_df[0].index)
 
-    curve, = AX.plot([],[],[],".", alpha=0.3, markersize=30)
+    curves = []
+    for curve_index in range(len(euler_df)):
+        new_curve, = AX.plot([],[],[],".", alpha=0.4, markersize=20, label=curve_index+1)
+        curves.append(new_curve)
+
+    # only for 4 cells
+    axis1, = AX.plot([],[],[],":", alpha=0.1, markersize=0, c="black")
+    axis2, = AX.plot([],[],[],":", alpha=0.1, markersize=0, c="black")
+
     anim = FuncAnimation(FIG, update_replace, steps, 
-                        fargs=(curve, euler_df)
+                        fargs=(curves, axis1, axis2, euler_df)
                         ,interval=500
                         ,repeat=True)
-    plt.show()
-    anim.save("movie.gif")
+
+
+    AX.legend()
+    anim.save("XYZ.gif")
+
+    AX.view_init(90, -90, 0)
+    anim.save("XY.gif")
+
+    AX.view_init(0, -90, 0)
+    anim.save("XZ.gif")
+
+    AX.view_init(0, 0, 0)
+    anim.save("YZ.gif")
+
+
 
 # def update(frame, curve, x, y, z, data):
 #     x.append(data["x"][frame])
@@ -52,19 +73,23 @@ def animate(euler_df):
 #     curve.set_3d_properties(z)
 #     return curve, 
 
-def update_replace(frame, curve, data):
+def update_replace(frame, curves, axis1, axis2, data):
 
-    x, y, z = [], [], []
+    for curve_index in range(len(curves)):
+        x = [data[curve_index]["x"][frame]]
+        y = [data[curve_index]["y"][frame]]
+        z = data[curve_index]["z"][frame]
 
-    for euler in data:
-        x.append(euler["x"][frame])
-        y.append(euler["y"][frame])
-        z.append(euler["z"][frame])
+        curves[curve_index].set_data([x, y])
+        curves[curve_index].set_3d_properties([z])
+
+    # only for 4 cells
+    axis1.set_data([[data[0]["x"][frame], data[2]["x"][frame]],[data[0]["y"][frame], data[2]["y"][frame]]])
+    axis1.set_3d_properties([data[0]["z"][frame], data[2]["z"][frame]])
+    axis2.set_data([[data[1]["x"][frame], data[3]["x"][frame]],[data[1]["y"][frame], data[3]["y"][frame]]])
+    axis2.set_3d_properties([data[1]["z"][frame], data[3]["z"][frame]])
+
     
-    curve.set_data([x, y])
-    curve.set_3d_properties([z])
-    
-    return curve, 
 
 #-----------------------------------------------------------------
 "FOR TESTING"

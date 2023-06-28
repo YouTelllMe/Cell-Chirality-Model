@@ -46,9 +46,9 @@ def animate(euler_df):
     for curve_index in range(len(euler_df)):
         color = COLORS[curve_index % 4]
         new_curve, = AX.plot([],[],[],".", alpha=0.4, markersize=20, label=curve_index+1, c=color)
-        x_support, = AX.plot([],[],[],"o:", alpha=0.4, markersize=3, linewidth=1, c=color)
-        y_support, = AX.plot([],[],[],"o:", alpha=0.4, markersize=3, linewidth=1, c=color)
-        z_support, = AX.plot([],[],[],"o:", alpha=0.4, markersize=3, linewidth=1, c=color)
+        x_support, = AX.plot([],[],[],"o", alpha=0.4, markersize=3, linewidth=1, c=color)
+        y_support, = AX.plot([],[],[],"o", alpha=0.4, markersize=3, linewidth=1, c=color)
+        z_support, = AX.plot([],[],[],"o", alpha=0.4, markersize=3, linewidth=1, c=color)
 
         curves.append(new_curve)
         curve_supports.append([x_support, y_support, z_support])

@@ -3,13 +3,12 @@ Python Visualization of Cell Chirality Spring Model in early embryonic developme
 
 Notes: https://www.overleaf.com/read/xqqjsrdqwkcj 
 
-![XYZ](https://github.com/YouTelllMe/Cell-Chirality-Visualization/XYZ.gif)
+## Labelled Visualizations
 
+![XYZ dot](https://github.com/YouTelllMe/Cell-Chirality-Visualization/assets/80024712/c04e09c8-4c7a-4fc0-aea3-db9a91236e96)
+![XYZ dotted dot](https://github.com/YouTelllMe/Cell-Chirality-Visualization/assets/80024712/b48528ae-a8fc-4ed8-ba21-b55ff90956fa)
 
-
-Older Visualization
-
-![XYZ](https://github.com/YouTelllMe/Cell-Chirality-Visualization/assets/80024712/c7ea8571-6dba-4128-bfdd-eee3ec4d9f8f)
+## Side Visualizations
 
 ### Bird Eye view
 ![XY](https://github.com/YouTelllMe/Cell-Chirality-Visualization/assets/80024712/e1533dec-c6f1-4bd6-9fc6-19cc348f04a1)

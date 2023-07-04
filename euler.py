@@ -42,26 +42,26 @@ def animate(euler_df):
     steps = len(euler_df[0].index)
 
     curves = []
-    curve_supports = []
     for curve_index in range(len(euler_df)):
         color = COLORS[curve_index % 4]
         new_curve, = AX.plot([],[],[],".", alpha=0.4, markersize=20, label=curve_index+1, c=color)
-        x_support, = AX.plot([],[],[],"o", alpha=0.4, markersize=3, linewidth=1, c=color)
-        y_support, = AX.plot([],[],[],"o", alpha=0.4, markersize=3, linewidth=1, c=color)
-        z_support, = AX.plot([],[],[],"o", alpha=0.4, markersize=3, linewidth=1, c=color)
-
         curves.append(new_curve)
-        curve_supports.append([x_support, y_support, z_support])
 
-    # only for 4 cells
-    axis1, = AX.plot([],[],[],":", alpha=0.4, markersize=0, c="black")
-    axis2, = AX.plot([],[],[],":", alpha=0.4, markersize=0, c="black")
-
+    axis1, = AX.plot([],[],[],":", alpha=0.4, markersize=0, linewidth=1, c="black")
+    axis2, = AX.plot([],[],[],":", alpha=0.4, markersize=0, linewidth=1, c="black")
+    x1, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
+    x2, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
+    y1, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
+    y2, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
+    z1, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
+    z2, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
 
 
 
     anim = FuncAnimation(FIG, update_replace, steps, 
-                        fargs=(curves, curve_supports, axis1, axis2, euler_df)
+                        fargs=(curves, axis1, axis2, 
+                               x1, x2, y1, y2, z1, z2,
+                               euler_df)
                         ,interval=500
                         ,repeat=True)
 
@@ -69,14 +69,14 @@ def animate(euler_df):
     AX.legend()
     anim.save("XYZ.gif")
 
-    AX.view_init(90, -90, 0)
-    anim.save("XY.gif")
+    # AX.view_init(90, -90, 0)
+    # anim.save("XY.gif")
 
-    AX.view_init(0, -90, 0)
-    anim.save("XZ.gif")
+    # AX.view_init(0, -90, 0)
+    # anim.save("XZ.gif")
 
-    AX.view_init(0, 0, 0)
-    anim.save("YZ.gif")
+    # AX.view_init(0, 0, 0)
+    # anim.save("YZ.gif")
 
 
 # def update(frame, curve, x, y, z, data):
@@ -87,7 +87,8 @@ def animate(euler_df):
 #     curve.set_3d_properties(z)
 #     return curve, 
 
-def update_replace(frame, curves, curve_supports, axis1, axis2, data):
+def update_replace(frame, curves, axis1, axis2,
+                   x1, x2, y1, y2, z1, z2, data):
 
     for curve_index in range(len(curves)):
         x = data[curve_index]["x"][frame]
@@ -97,33 +98,37 @@ def update_replace(frame, curves, curve_supports, axis1, axis2, data):
         curves[curve_index].set_data([[x], [y]])
         curves[curve_index].set_3d_properties([z])
 
-        # x supports
-        # curve_supports[curve_index][0].set_data([[x, x], [0, y]])
-        # curve_supports[curve_index][0].set_3d_properties([0, z])
+        # xy supports
+        # curve_supports[curve_index][0].set_data([[x, x], [y, y]])
+        # curve_supports[curve_index][0].set_3d_properties([z, -SIZE])
 
-        # # y supports
-        # curve_supports[curve_index][1].set_data([[0, x], [y, y]])
-        # curve_supports[curve_index][1].set_3d_properties([0, z])
+        # # xz supports
+        # curve_supports[curve_index][1].set_data([[x, -SIZE], [y, y]])
+        # curve_supports[curve_index][1].set_3d_properties([z, z])
 
-        # # z supports
-        # curve_supports[curve_index][2].set_data([[0, x], [0, y]])
+        # # yz supports
+        # curve_supports[curve_index][2].set_data([[x, x], [y, SIZE]])
         # curve_supports[curve_index][2].set_3d_properties([z, z])
 
-        # xy supports
-        curve_supports[curve_index][0].set_data([[x, x], [y, y]])
-        curve_supports[curve_index][0].set_3d_properties([z, -SIZE])
 
-        # xz supports
-        curve_supports[curve_index][1].set_data([[x, -SIZE], [y, y]])
-        curve_supports[curve_index][1].set_3d_properties([z, z])
+    # wall cell axis
+    x1.set_data([[-SIZE, -SIZE],[data[0]["y"][frame], data[2]["y"][frame]]])
+    x1.set_3d_properties([data[0]["z"][frame], data[2]["z"][frame]])
+    x2.set_data([[-SIZE, -SIZE],[data[1]["y"][frame], data[3]["y"][frame]]])
+    x2.set_3d_properties([data[1]["z"][frame], data[3]["z"][frame]])
 
-        # yz supports
-        curve_supports[curve_index][2].set_data([[x, x], [y, SIZE]])
-        curve_supports[curve_index][2].set_3d_properties([z, z])
+    y1.set_data([[data[0]["x"][frame], data[2]["x"][frame]],[SIZE, SIZE]])
+    y1.set_3d_properties([data[0]["z"][frame], data[2]["z"][frame]])
+    y2.set_data([[data[1]["x"][frame], data[3]["x"][frame]],[SIZE, SIZE]])
+    y2.set_3d_properties([data[1]["z"][frame], data[3]["z"][frame]])
+
+    z1.set_data([[data[0]["x"][frame], data[2]["x"][frame]],[data[0]["y"][frame], data[2]["y"][frame]]])
+    z1.set_3d_properties([-SIZE, -SIZE])
+    z2.set_data([[data[1]["x"][frame], data[3]["x"][frame]],[data[1]["y"][frame], data[3]["y"][frame]]])
+    z2.set_3d_properties([-SIZE, -SIZE])
 
 
-
-    # only for 4 cells
+    # inter cell axis
     axis1.set_data([[data[0]["x"][frame], data[2]["x"][frame]],[data[0]["y"][frame], data[2]["y"][frame]]])
     axis1.set_3d_properties([data[0]["z"][frame], data[2]["z"][frame]])
     axis2.set_data([[data[1]["x"][frame], data[3]["x"][frame]],[data[1]["y"][frame], data[3]["y"][frame]]])
@@ -142,7 +147,7 @@ def sample_func(vector):
 
 OMEGA = 1
 L = 2
-K = 1
+K = 3
 D = 1
 C = 1
 

@@ -145,11 +145,7 @@ def sample_func(vector):
 #----------------------------------------------------------------
 "SCRIPT"
 
-OMEGA = 1
-L = 2
-K = 3
-D = 1
-C = 1
+A = 100
 
 def physics_system(vector):
     
@@ -177,31 +173,31 @@ def physics_system(vector):
     u43 = -1 * u34
 
     # equation 1
-    p1_prime = (K * (np.linalg.norm(np.subtract(p1, p2)) - L) * u12 
-                + K * (np.linalg.norm(np.subtract(p2, p4)) - L) * u13
-                - K * (p1z - L / 2) * k_hat
-                + D * L / 2 * OMEGA * (np.cross(u21, u24)-np.cross(u12, u13)-np.cross(u13, k_hat))) / C
+    p1_prime = ((np.linalg.norm(np.subtract(p1, p2)) - 1) * u12 
+                + (np.linalg.norm(np.subtract(p2, p4)) - 1) * u13
+                - (p1z - 1 / 2) * k_hat
+                + A * (np.cross(u21, u24)-np.cross(u12, u13)-np.cross(u13, k_hat)))
     p1_prime_normalized = p1_prime / np.linalg.norm(p1_prime)
 
     # equation 2
-    p2_prime = (K * (np.linalg.norm(np.subtract(p2, p1)) - L) * u21
-                + K * (np.linalg.norm(np.subtract(p2, p4)) - L) * u24
-                - K * (p2z - L / 2) * k_hat
-                + D * L / 2 * OMEGA * (np.cross(u12, u13)-np.cross(u21, u24)-np.cross(u24, k_hat))) / C
+    p2_prime = ((np.linalg.norm(np.subtract(p2, p1)) - 1) * u21
+                + (np.linalg.norm(np.subtract(p2, p4)) - 1) * u24
+                - (p2z - 1 / 2) * k_hat
+                + A * (np.cross(u12, u13)-np.cross(u21, u24)-np.cross(u24, k_hat)))
     p2_prime_normalized = p2_prime / np.linalg.norm(p2_prime)
 
     # equation 3
-    p3_prime = (K * (np.linalg.norm(np.subtract(p3, p1)) - L) * u31
-                + K * (np.linalg.norm(np.subtract(p3, p4)) - L) * u34
-                - K * (p3z - L / 2) * k_hat
-                + D * L / 2 * OMEGA * (np.cross(u43, u42)-np.cross(u34, u31)-np.cross(u31, k_hat))) / C
+    p3_prime = ((np.linalg.norm(np.subtract(p3, p1)) - 1) * u31
+                + (np.linalg.norm(np.subtract(p3, p4)) - 1) * u34
+                - (p3z - 1 / 2) * k_hat
+                + A * (np.cross(u43, u42)-np.cross(u34, u31)-np.cross(u31, k_hat)))
     p3_prime_normalized = p3_prime / np.linalg.norm(p3_prime)
 
     # equation 4
-    p4_prime = (K * (np.linalg.norm(np.subtract(p4, p2)) - L) * u42 
-                + K * (np.linalg.norm(np.subtract(p4, p3)) - L) * u43
-                - K * (p4z - L / 2) * k_hat
-                + D * L / 2 * OMEGA * (np.cross(u34, u31)-np.cross(u43, u42)-np.cross(u42, k_hat))) / C
+    p4_prime = ((np.linalg.norm(np.subtract(p4, p2)) - 1) * u42 
+                + (np.linalg.norm(np.subtract(p4, p3)) - 1) * u43
+                - (p4z - 1 / 2) * k_hat
+                + A * (np.cross(u34, u31)-np.cross(u43, u42)-np.cross(u42, k_hat)))
     p4_prime_normalized = p4_prime / np.linalg.norm(p4_prime)
 
     
@@ -229,7 +225,7 @@ AX.set(zlim3d=(-SIZE, SIZE), zlabel='Z')
 # print(physics_system([-1,1,1,1,1,1,-1,-1,1,-1,1,1]))
 
 
-euler_df = euler(physics_system, np.array([-1,1,1, 1,1,1, -1,-1,1, 1,-1,1]), 0.05, 20)
+euler_df = euler(physics_system, np.array([-1,1,1, 1,1,1, -1,-1,1, 1,-1,1]), 0.05, 100)
 animate(euler_df)
 plt.show()
 

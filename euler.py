@@ -4,28 +4,23 @@ import pandas as pd
 from matplotlib.animation import FuncAnimation
 
 
-def euler(func, start_vec, h, steps, A):
+def euler(func, start_vec, h, A, t, l):
     """
     Perform euler's method by repeatedly calling the given function. Note that this function
     is programmed to handle systems of 12 equations (4 position vectors in succession)
-
-
     """
 
     euler_coords = []
-    distance = {"12": [2], "13": [2], "14": [2*np.sqrt(2)],
-                "23": [2*np.sqrt(2)], "24": [2], "34": [2]}
-    angle = {"dorsal1": [90], "dorsal2": [90], "anterior1": [0],
-                "anterior2": [0]}
+    distance = {"12": [], "13": [], "14": [],
+                "23": [], "24": [], "34": []}
+    angle = {"dorsal1": [], "dorsal2": [], "anterior1": [],
+                "anterior2": []}
     curr_pos = start_vec
-    curr_velocity = func(start_vec, A)
-
-    euler_coords.append(curr_pos)
 
     # take "steps" steps
-    for _ in range(steps):
+    for time in t:
+        curr_velocity = func(curr_pos, A, time, l)
         curr_pos = curr_pos + h * curr_velocity
-        curr_velocity = func(curr_pos, A)
         euler_coords.append(curr_pos)
 
         #positions
@@ -50,6 +45,15 @@ def euler(func, start_vec, h, steps, A):
         anterior_ang_1 = np.arccos(np.dot(anterior_ax_1, anterior_0)/(np.linalg.norm(anterior_ax_1)))
         anterior_ang_2 = np.arccos(np.dot(anterior_ax_2, anterior_0)/(np.linalg.norm(anterior_ax_2)))
 
+        if dorsal_ax_1[1] < 0:
+            dorsal_ang_1 *= -1
+        if dorsal_ax_2[1] < 0:
+            dorsal_ang_2 *= -1
+        if anterior_ax_1[1] < 0:
+            anterior_ang_1 *= -1
+        if anterior_ax_2[1] < 0:
+            anterior_ang_2 *= -1
+
         angle["dorsal1"].append(dorsal_ang_1 * (180 / np.pi))
         angle["dorsal2"].append(dorsal_ang_2 * (180 / np.pi))
         angle["anterior1"].append(anterior_ang_1 * (180 / np.pi))
@@ -72,7 +76,6 @@ def euler(func, start_vec, h, steps, A):
     euler_df = pd.DataFrame(data=euler_coords, columns=column_names)
     distance_df = pd.DataFrame(distance)
     angle_df = pd.DataFrame(angle)
-
 
     # separate df into 4 vector dfs 
     output_eulers = []
@@ -158,7 +161,7 @@ def update_replace(frame, curves, axis1, axis2,
         y = data[curve_index]["y"][frame]
         z = data[curve_index]["z"][frame]
 
-        ball = generate_ball([x,y,z], 1)
+        ball = generate_ball([x,y,z], l)
         ball["x"].append(x)
         ball["y"].append(y)
         ball["z"].append(z)
@@ -237,7 +240,7 @@ def sample_func(vector):
 
 # non dimensionalized parameter
 
-def physics_system(vector, A):
+def physics_system(vector, A, l, t):
     """
     4 cell model physics system, used as "func" for Euler
     """
@@ -265,32 +268,36 @@ def physics_system(vector, A):
     u42 = -1 * u24
     u43 = -1 * u34
 
-    # equation 1
-    p1_prime = ((np.linalg.norm(np.subtract(p1, p2)) - 1) * u12 
+    # equation 1; negative sign due to cortical flow
+    p1_prime = l * ((np.linalg.norm(np.subtract(p1, p2)) - 1) * u12 
                 + (np.linalg.norm(np.subtract(p2, p4)) - 1) * u13
                 - (p1z - 1 / 2) * k_hat
-                + A * (np.cross(u21, u24)-np.cross(u12, u13)-np.cross(u13, k_hat)))
+                + A * np.multiply(t**2,np.e**(-0.02169 * t)) * 
+                (np.cross(u21, u24)-np.cross(u12, u13)-np.cross(u13, k_hat)))
     # p1_prime_normalized = p1_prime / np.linalg.norm(p1_prime)
 
-    # equation 2
-    p2_prime = ((np.linalg.norm(np.subtract(p2, p1)) - 1) * u21
+    # equation 2; negative sign due to cortical flow
+    p2_prime = l * ((np.linalg.norm(np.subtract(p2, p1)) - 1) * u21
                 + (np.linalg.norm(np.subtract(p2, p4)) - 1) * u24
                 - (p2z - 1 / 2) * k_hat
-                + A * (np.cross(u12, u13)-np.cross(u21, u24)-np.cross(u24, k_hat)))
+                + A * np.multiply(t**2,np.e**(-0.02169 * t)) * 
+                (np.cross(u12, u13)-np.cross(u21, u24)-np.cross(u24, k_hat)))
     # p2_prime_normalized = p2_prime / np.linalg.norm(p2_prime)
 
     # equation 3
-    p3_prime = ((np.linalg.norm(np.subtract(p3, p1)) - 1) * u31
+    p3_prime = l * ((np.linalg.norm(np.subtract(p3, p1)) - 1) * u31
                 + (np.linalg.norm(np.subtract(p3, p4)) - 1) * u34
                 - (p3z - 1 / 2) * k_hat
-                + A * (np.cross(u43, u42)-np.cross(u34, u31)-np.cross(u31, k_hat)))
+                + A * np.multiply(t**2,np.e**(-0.02169 * t)) * 
+                (np.cross(u43, u42)-np.cross(u34, u31)-np.cross(u31, k_hat)))
     # p3_prime_normalized = p3_prime / np.linalg.norm(p3_prime)
 
     # equation 4
-    p4_prime = ((np.linalg.norm(np.subtract(p4, p2)) - 1) * u42 
+    p4_prime = l * ((np.linalg.norm(np.subtract(p4, p2)) - 1) * u42 
                 + (np.linalg.norm(np.subtract(p4, p3)) - 1) * u43
                 - (p4z - 1 / 2) * k_hat
-                + A * (np.cross(u34, u31)-np.cross(u43, u42)-np.cross(u42, k_hat)))
+                + A * np.multiply(t**2,np.e**(-0.02169 * t)) * 
+                (np.cross(u34, u31)-np.cross(u43, u42)-np.cross(u42, k_hat)))
     # p4_prime_normalized = p4_prime / np.linalg.norm(p4_prime)
 
     
@@ -302,18 +309,21 @@ if __name__ == "__main__":
     # setup
     FIG = plt.figure()
     AX = FIG.add_subplot(projection="3d")
-    SIZE = 2
-    STEPS = 39
 
+
+    t = np.linspace(1, 41, 41)*5.000000365235591
+    l = 2.4330065244796355
+    # AX.grid(False)
+    # print(physics_system([-1,1,1,1,1,1,-1,-1,1,-1,1,1]))
+    A = 0.028502687016652727
+
+    SIZE = int(l) + 2
     # Setting range of diagram
     AX.set(xlim3d=(-SIZE, SIZE), xlabel='X')
     AX.set(ylim3d=(-SIZE, SIZE), ylabel='Y')
     AX.set(zlim3d=(-SIZE, SIZE), zlabel='Z')
 
-    # AX.grid(False)
-    # print(physics_system([-1,1,1,1,1,1,-1,-1,1,-1,1,1]))
-    A = 3.97312375e-08
-    euler_df = euler(physics_system, np.array([-1,1,1, 1,1,1, -1,-1,1, 1,-1,1]), 0.0005, STEPS, A)[0]
+    euler_df = euler(physics_system, np.array([-l,l,l, l,l,l, -l,-l,l, l,-l,l]), 0.0005, A, t, l)[0]
     animate(euler_df)
     plt.show()
 

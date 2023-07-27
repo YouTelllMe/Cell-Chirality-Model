@@ -118,7 +118,7 @@ if __name__ == "__main__":
     axAA.plot(tau, computed_anterior_2, label="model", markersize=2)
     axAA.plot(anterior_t, aa_averege, label="average data", markersize=2)
 
-    axAD.plot(tau, computed_anterior_2, label="model", markersize=2)
+    axAD.plot(tau, computed_anterior_1, label="model", markersize=2)
     axAD.plot(anterior_t, ad_average, label="average data", markersize=2)
 
     axDA.title.set_text("Dorsal Angle - Anterior Axis")

@@ -161,7 +161,7 @@ def update_replace(frame, curves, axis1, axis2,
         y = data[curve_index]["y"][frame]
         z = data[curve_index]["z"][frame]
 
-        ball = generate_ball([x,y,z], l)
+        ball = generate_ball([x,y,z], l/2)
         ball["x"].append(x)
         ball["y"].append(y)
         ball["z"].append(z)
@@ -317,13 +317,13 @@ if __name__ == "__main__":
     # print(physics_system([-1,1,1,1,1,1,-1,-1,1,-1,1,1]))
     A = 0.028502687016652727
 
-    SIZE = int(l) + 2
+    SIZE = int(l/2) + 1
     # Setting range of diagram
     AX.set(xlim3d=(-SIZE, SIZE), xlabel='X')
     AX.set(ylim3d=(-SIZE, SIZE), ylabel='Y')
     AX.set(zlim3d=(-SIZE, SIZE), zlabel='Z')
 
-    euler_df = euler(physics_system, np.array([-l,l,l, l,l,l, -l,-l,l, l,-l,l]), 0.0005, A, t, l)[0]
+    euler_df = euler(physics_system, np.array([-l/2,l/2,l/2, l/2,l/2,l/2, -l/2,-l/2,l/2, l/2,-l/2,l/2]), 0.0005, A, t, l)[0]
     animate(euler_df)
     plt.show()
 

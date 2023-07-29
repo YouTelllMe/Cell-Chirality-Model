@@ -28,7 +28,7 @@ def linear(x, time, data):
 if __name__ == "__main__":
     current_dir = os.getcwd()
     # read xlsx files
-    corticalflow_xls = pd.ExcelFile(os.path.join(current_dir, "corticalflow.xlsx"))
+    corticalflow_xls = pd.ExcelFile(os.path.join(current_dir, "data", "corticalflow.xlsx"))
     # remove first row
     corticalflow = pd.read_excel(corticalflow_xls, "corticalflow").drop(index=[0]).reset_index(drop=True)
 

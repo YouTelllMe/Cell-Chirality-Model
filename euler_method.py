@@ -81,7 +81,6 @@ def euler(func, start_vec, h, tau, A, B, t_final):
     # rudimentary check 
     assert len(start_vec) % 3 == 0, "number of columns not divisible by 3"
     num_columns = len(start_vec)
-
     # data frames with index as column names for all vector components
     column_names=[str(col) for col in range(num_columns)]
     euler_df = pd.DataFrame(data=euler_coords, columns=column_names)

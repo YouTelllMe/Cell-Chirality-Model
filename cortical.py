@@ -3,50 +3,57 @@ import scipy
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import config
+from enum import Enum, auto
+from dataclasses import dataclass
 
-def squared(x, time, data):
+@dataclass
+class CorticalFlowFit(Enum):
+    LINEAR = auto()
+    QUADRATIC = auto()
+
+
+def fit_func(x, time, data, fit_type):
     alpha, lam = x
     time = np.array(time)
-    output = np.multiply(alpha*time**2,np.e**(-lam * time))
-    least_squares = 0 
-    for column_index in range(10):
-        least_squares += np.linalg.norm(data.iloc[:, column_index] - output) ** 2
-    
-    return least_squares
 
-def linear(x, time, data):
-    alpha, lam = x
-    time = np.array(time)
-    output = np.multiply(alpha*time,np.e**(-lam * time))
-    least_squares = 0 
+    if fit_type == CorticalFlowFit.LINEAR:
+        # αte^(-λt)
+        output = alpha * time * np.e**(-lam * time)
+    elif fit_type == CorticalFlowFit.QUADRATIC:
+        # αt^2e^(-λt)
+        output = alpha * time**2 * np.e**(-lam * time)
+
+    residual_squared = 0 
     for column_index in range(10):
-        least_squares += np.linalg.norm(data.iloc[:, column_index] - output) ** 2
+        residual_squared += np.linalg.norm(data.iloc[:, column_index] - output) ** 2
     
-    return least_squares
+    return residual_squared
 
 
 if __name__ == "__main__":
-    current_dir = os.getcwd()
-    # read xlsx files
-    corticalflow_xls = pd.ExcelFile(os.path.join(current_dir, "data", "corticalflow.xlsx"))
-    # remove first row
-    corticalflow = pd.read_excel(corticalflow_xls, "corticalflow").drop(index=[0]).reset_index(drop=True)
 
+    # read cortical file; drop first row (column index) and reset row index
+    corticalflow_xls = pd.ExcelFile(config.CORTICALFLOW_PATH)
+    corticalflow = pd.read_excel(corticalflow_xls, "corticalflow")
+    corticalflow = corticalflow.drop(index=[0]).reset_index(drop=True)
+
+    # get time column and drop time column from data
     time = corticalflow["Time (s)"]
-    corticalflow.drop(columns=["Time (s)"], inplace=True)
+    corticalflow = corticalflow.drop(columns=["Time (s)"])
+    # N = 10; split into left and right side; absolute value negative data for averaging
     corticalflow_right = corticalflow.iloc[:, 0:10]
     corticalflow_left = corticalflow.iloc[:, 10:20]
     corticalflow_left = corticalflow_left.apply(lambda x: abs(x))
     
-    # alpha_r_sq, lambda_r_sq = scipy.optimize.fmin(squared, [1, 1], args=(time, corticalflow_right))
-    alpha_r, lambda_r = scipy.optimize.fmin(linear, [1, 1], args=(time, corticalflow_right))
-    # alpha_l_sq, lambda_l_sq = scipy.optimize.fmin(squared, [1, 1], args=(time, corticalflow_left))
-    alpha_l, lambda_l = scipy.optimize.fmin(linear, [1, 1], args=(time, corticalflow_left))
+    # fit data using αte^(-λt)
+    alpha_r, lambda_r = scipy.optimize.fmin(fit_func, [1, 1], args=(time, corticalflow_right, CorticalFlowFit.LINEAR))
+    alpha_l, lambda_l = scipy.optimize.fmin(fit_func, [1, 1], args=(time, corticalflow_left, CorticalFlowFit.LINEAR))
 
-    # average angles for plotting
-    cortical_sum_right = corticalflow_right.iloc[:,0].to_numpy()
-    cortical_sum_left = corticalflow_left.iloc[:,0].to_numpy()
-    for column in range(1,10):
+    # average angles
+    cortical_sum_right = 0
+    cortical_sum_left = 0
+    for column in range(10):
         cortical_sum_right += corticalflow_right.iloc[:,column].to_numpy()
         cortical_sum_left += corticalflow_left.iloc[:,column].to_numpy()
     cortical_average_right = cortical_sum_right / 10
@@ -65,8 +72,7 @@ if __name__ == "__main__":
     axRight.plot(time, cortical_average_right)
     axRight.plot(time, np.multiply(alpha_r*time,np.e**(-lambda_r * time)))
     axRight.plot(time, np.multiply(0.000527*time,np.e**(-0.01466569 * time)))
-
-
-
-    print((alpha_r+alpha_l)/2, (lambda_r+lambda_l)/2)
     plt.savefig("cortical_fit.png")
+
+    # print average fit coefficients 
+    print((alpha_r+alpha_l)/2, (lambda_r+lambda_l)/2)

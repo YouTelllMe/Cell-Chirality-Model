@@ -1,7 +1,7 @@
 import os 
 import matplotlib.pyplot as plt
 import pandas as pd
-
+import config
 
 CURR_DIR = os.getcwd()
 
@@ -41,8 +41,8 @@ axDist.plot(t, distances["34"].to_numpy(), "-o", label="34", c="pink", markersiz
 
 
 
-dorsal_xls = pd.ExcelFile(os.path.join(CURR_DIR, "data", "dorsal.xlsx"))
-anterior_xls = pd.ExcelFile(os.path.join(CURR_DIR, "data", "anterior.xlsx"))
+dorsal_xls = pd.ExcelFile(config.DORSAL_ANGLE_PATH)
+anterior_xls = pd.ExcelFile(config.ANTERIOR_ANGLE_PATH)
 # remove first two rows
 dorsal = pd.read_excel(dorsal_xls, "dorsal").drop(index=[0]).reset_index(drop=True)
 anterior = pd.read_excel(anterior_xls, "anterior").drop(index=[0]).reset_index(drop=True)

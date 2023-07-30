@@ -1,115 +1,138 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+from pandas import DataFrame
+from typing import Sequence
 
 
 COLORS = ["blue", "orange", "green", "red"]
 
-def animate(FIG, AX, euler_df, SIZE):
+def animate(euler_df: Sequence[DataFrame]):
     """
     Takes a euler df and animates it in matplotlib, assumes 4 components
     """
+    # setup figure and axes
+    FIG = plt.figure()
+    AX = FIG.add_subplot(projection="3d")
+
+    # setting range 
+    SIZE = 1
+    AX.set(xlim3d=(-SIZE, SIZE), xlabel='X')
+    AX.set(ylim3d=(-SIZE, SIZE), ylabel='Y')
+    AX.set(zlim3d=(-SIZE, SIZE), zlabel='Z')
+
     steps = len(euler_df[0].index)
 
+    # initialize 4 position vectors 
+    positions_vectors = []
+    for position_index in range(len(euler_df)):
+        color = COLORS[position_index]
+        new_position, = AX.plot([],[],[],".", alpha=0.4, markersize=3, label=position_index+1, c=color)
+        positions_vectors.append(new_position)
+    
+    AX.legend()
 
-    curves = []
-    for curve_index in range(len(euler_df)):
-        color = COLORS[curve_index % 4]
-        new_curve, = AX.plot([],[],[],".", alpha=0.4, markersize=3, label=curve_index+1, c=color)
-        curves.append(new_curve)
+    # initialize axes of rotation
+    rotation_axis_1, = AX.plot([],[],[],":", alpha=0.4, markersize=0, linewidth=1, c="black")
+    rotation_axis_2, = AX.plot([],[],[],":", alpha=0.4, markersize=0, linewidth=1, c="black")
+    rotation_axes = (rotation_axis_1,
+                     rotation_axis_2,)
 
-    # axes of rotation initialization
-    axis1, = AX.plot([],[],[],":", alpha=0.4, markersize=0, linewidth=1, c="black")
-    axis2, = AX.plot([],[],[],":", alpha=0.4, markersize=0, linewidth=1, c="black")
-
-    # wall vectors initialization
-    x1, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
-    x2, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
-    y1, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
-    y2, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
-    z1, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
-    z2, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
+    # initialize wall vectors 
+    wall_x1, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
+    wall_x2, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
+    wall_y1, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
+    wall_y2, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
+    wall_z1, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
+    wall_z2, = AX.plot([],[],[],"-o", alpha=0.4, markersize=3, linewidth=1, c="black")
+    wall_vectors = (wall_x1,
+                    wall_x2,
+                    wall_y1,
+                    wall_y2,
+                    wall_z1,
+                    wall_z2,)
 
     # animate, run update_replace at every step
-    anim = FuncAnimation(FIG, update_replace, steps, 
-                        fargs=(curves, axis1, axis2, 
-                               x1, x2, y1, y2, z1, z2,
-                               euler_df, SIZE)
-                        ,interval=1
-                        ,repeat=True)
+    anim = FuncAnimation(FIG, 
+                         update_replace, 
+                         steps, 
+                         fargs=(euler_df,
+                               SIZE,
+                               positions_vectors, 
+                               rotation_axes, 
+                               wall_vectors, 
+                               ),
+                         interval=1,
+                         repeat=True,
+                         )
 
     # save animation from different angles
-    AX.legend()
     anim.save("XYZ.gif")
-
     AX.view_init(90, -90, 0)
     anim.save("XY.gif")
-
     AX.view_init(0, -90, 0)
     anim.save("XZ.gif")
-
     AX.view_init(0, 0, 0)
     anim.save("YZ.gif")
 
 
-def update_replace(frame, curves, axis1, axis2,
-                   x1, x2, y1, y2, z1, z2, data, SIZE):
+def update_replace(frame, 
+                   data, 
+                   SIZE, 
+                   positions, 
+                   rotation_axes,
+                   wall_vectors,):
 
-    # update position vector
-    for curve_index in range(len(curves)):
+    # update position vector, draw spheres
+    for curve_index in range(len(positions)):
         x = data[curve_index]["x"][frame]
         y = data[curve_index]["y"][frame]
         z = data[curve_index]["z"][frame]
-
         ball = generate_ball([x,y,z], 0.5)
         ball["x"].append(x)
         ball["y"].append(y)
         ball["z"].append(z)
-
-        curves[curve_index].set_data([ball["x"], ball["y"]])
-        curves[curve_index].set_3d_properties(ball["z"])
+        positions[curve_index].set_data([ball["x"], ball["y"]])
+        positions[curve_index].set_3d_properties(ball["z"])
 
     # update wall cell axis
-    x1.set_data([[-SIZE, -SIZE],[data[0]["y"][frame], data[2]["y"][frame]]])
-    x1.set_3d_properties([data[0]["z"][frame], data[2]["z"][frame]])
-    x2.set_data([[-SIZE, -SIZE],[data[1]["y"][frame], data[3]["y"][frame]]])
-    x2.set_3d_properties([data[1]["z"][frame], data[3]["z"][frame]])
-
-    y1.set_data([[data[0]["x"][frame], data[2]["x"][frame]],[SIZE, SIZE]])
-    y1.set_3d_properties([data[0]["z"][frame], data[2]["z"][frame]])
-    y2.set_data([[data[1]["x"][frame], data[3]["x"][frame]],[SIZE, SIZE]])
-    y2.set_3d_properties([data[1]["z"][frame], data[3]["z"][frame]])
-
-    z1.set_data([[data[0]["x"][frame], data[2]["x"][frame]],[data[0]["y"][frame], data[2]["y"][frame]]])
-    z1.set_3d_properties([-SIZE, -SIZE])
-    z2.set_data([[data[1]["x"][frame], data[3]["x"][frame]],[data[1]["y"][frame], data[3]["y"][frame]]])
-    z2.set_3d_properties([-SIZE, -SIZE])
-
+    wall_vectors[0].set_data([[-SIZE, -SIZE],[data[0]["y"][frame], data[2]["y"][frame]]])
+    wall_vectors[0].set_3d_properties([data[0]["z"][frame], data[2]["z"][frame]])
+    wall_vectors[1].set_data([[-SIZE, -SIZE],[data[1]["y"][frame], data[3]["y"][frame]]])
+    wall_vectors[1].set_3d_properties([data[1]["z"][frame], data[3]["z"][frame]])
+    wall_vectors[2].set_data([[data[0]["x"][frame], data[2]["x"][frame]],[SIZE, SIZE]])
+    wall_vectors[2].set_3d_properties([data[0]["z"][frame], data[2]["z"][frame]])
+    wall_vectors[3].set_data([[data[1]["x"][frame], data[3]["x"][frame]],[SIZE, SIZE]])
+    wall_vectors[3].set_3d_properties([data[1]["z"][frame], data[3]["z"][frame]])
+    wall_vectors[4].set_data([[data[0]["x"][frame], data[2]["x"][frame]],[data[0]["y"][frame], data[2]["y"][frame]]])
+    wall_vectors[4].set_3d_properties([-SIZE, -SIZE])
+    wall_vectors[5].set_data([[data[1]["x"][frame], data[3]["x"][frame]],[data[1]["y"][frame], data[3]["y"][frame]]])
+    wall_vectors[5].set_3d_properties([-SIZE, -SIZE])
 
     # update axes of rotation
-    axis1.set_data([[data[0]["x"][frame], data[2]["x"][frame]],[data[0]["y"][frame], data[2]["y"][frame]]])
-    axis1.set_3d_properties([data[0]["z"][frame], data[2]["z"][frame]])
-    axis2.set_data([[data[1]["x"][frame], data[3]["x"][frame]],[data[1]["y"][frame], data[3]["y"][frame]]])
-    axis2.set_3d_properties([data[1]["z"][frame], data[3]["z"][frame]])
+    rotation_axes[0].set_data([[data[0]["x"][frame], data[2]["x"][frame]],[data[0]["y"][frame], data[2]["y"][frame]]])
+    rotation_axes[0].set_3d_properties([data[0]["z"][frame], data[2]["z"][frame]])
+    rotation_axes[1].set_data([[data[1]["x"][frame], data[3]["x"][frame]],[data[1]["y"][frame], data[3]["y"][frame]]])
+    rotation_axes[1].set_3d_properties([data[1]["z"][frame], data[3]["z"][frame]])
 
     
-
-def generate_ball(position, radius):
+def generate_ball(position: Sequence[float, float, float], radius: float):
+    """
+    Return evenly spaced coordinates on the sphere with center at position with radius radius.
+    """
+    
     delta = np.pi / 20
     rotation_matrix = np.array([[np.cos(delta), -np.sin(delta)], [np.sin(delta), np.cos(delta)]])
 
-    center_x = position[0]
-    center_y = position[1]
-    center_z = position[2]
 
-    curr_x = 0
-    curr_y = 0
-    curr_z = radius
+    center_x, center_y, center_z = position[0], position[1], position[2]
+    curr_x, curr_y, curr_z = 0, 0, radius
     ref_z = 0
-
     x = [center_x+curr_x]
     y = [center_y+curr_y]
     z = [center_z+curr_z]
-
 
     for phi in range(20):
         phi_vector = np.matmul(rotation_matrix, [ref_z, curr_z])

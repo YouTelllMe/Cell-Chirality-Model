@@ -7,22 +7,9 @@ import numpy as np
 from euler_method import euler
 from models import model_AB
 from euler_animate import animate
-
+import config
 
 def run_euler():
-    # setup
-    FIG = plt.figure()
-    AX = FIG.add_subplot(projection="3d")
-
-    A = 11.829718298223318 # A = t_final * d / c / l
-    B = 0.08065392483271669 # B = t_final * k / c / l
-
-    SIZE = 1
-    # Setting range of diagram
-    AX.set(xlim3d=(-SIZE, SIZE), xlabel='X')
-    AX.set(ylim3d=(-SIZE, SIZE), ylabel='Y')
-    AX.set(zlim3d=(-SIZE, SIZE), zlabel='Z')
-
     # initial point not included within tau
     t_final = 195
     A, B = 6.412403028415063, 0.03803481931476198
@@ -30,7 +17,7 @@ def run_euler():
     # takes 399 steps (initial position vector is given)
     tau = np.linspace(1/N, 1, N-1)
     euler_df = euler(model_AB, np.array([-0.5,0.5,0.5, 0.5,0.5,0.5, -0.5,-0.5,0.5, 0.5,-0.5,0.5]), 1/N, tau, A, B, t_final)[0]
-    animate(FIG, AX, euler_df, SIZE)
+    animate(euler_df)
     plt.show()
 
 
@@ -38,8 +25,8 @@ def run_euler():
 def fit_model():
     current_dir = os.getcwd()
     # read xlsx files
-    dorsal_xls = pd.ExcelFile(os.path.join(current_dir, "data", "dorsal.xlsx"))
-    anterior_xls = pd.ExcelFile(os.path.join(current_dir, "data", "anterior.xlsx"))
+    dorsal_xls = pd.ExcelFile(config.DORSAL_ANGLE_PATH)
+    anterior_xls = pd.ExcelFile(config.ANTERIOR_ANGLE_PATH)
     # remove first two rows
     dorsal = pd.read_excel(dorsal_xls, "dorsal").drop(index=[0]).reset_index(drop=True)
     anterior = pd.read_excel(anterior_xls, "anterior").drop(index=[0]).reset_index(drop=True)

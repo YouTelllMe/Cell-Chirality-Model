@@ -4,8 +4,10 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import config
+import utils
 from enum import Enum, auto
 from dataclasses import dataclass
+from collections.abc import Sequence
 
 @dataclass
 class CorticalFlowFit(Enum):
@@ -13,7 +15,14 @@ class CorticalFlowFit(Enum):
     QUADRATIC = auto()
 
 
-def fit_func(x, time, data, fit_type):
+def fit_func(x: tuple[float, float], time: Sequence, data: pd.DataFrame, fit_type: CorticalFlowFit) -> float:
+    """
+    Fit function that calculates the residuals of the cortical flow model to the raw data at a set of 
+    parameters; used for fitting. 
+
+    Returns the residual squared score
+    """
+
     alpha, lam = x
     time = np.array(time)
 
@@ -31,19 +40,13 @@ def fit_func(x, time, data, fit_type):
     return residual_squared
 
 
-if __name__ == "__main__":
+def fit_cortical():
 
     # read cortical file; drop first row (column index) and reset row index
     corticalflow_xls = pd.ExcelFile(config.CORTICALFLOW_PATH)
     corticalflow = pd.read_excel(corticalflow_xls, "corticalflow")
-    corticalflow = corticalflow.drop(index=[0]).reset_index(drop=True)
 
-    # get time column and drop time column from data
-    time = corticalflow["Time (s)"]
-    corticalflow = corticalflow.drop(columns=["Time (s)"])
-    # N = 10; split into left and right side; absolute value negative data for averaging
-    corticalflow_right = corticalflow.iloc[:, 0:10]
-    corticalflow_left = corticalflow.iloc[:, 10:20]
+    corticalflow_right, corticalflow_left, time = utils.process_rawdf(corticalflow, "Time(s)")
     corticalflow_left = corticalflow_left.apply(lambda x: abs(x))
     
     # fit data using αte^(-λt)
@@ -51,13 +54,8 @@ if __name__ == "__main__":
     alpha_l, lambda_l = scipy.optimize.fmin(fit_func, [1, 1], args=(time, corticalflow_left, CorticalFlowFit.LINEAR))
 
     # average angles
-    cortical_sum_right = 0
-    cortical_sum_left = 0
-    for column in range(10):
-        cortical_sum_right += corticalflow_right.iloc[:,column].to_numpy()
-        cortical_sum_left += corticalflow_left.iloc[:,column].to_numpy()
-    cortical_average_right = cortical_sum_right / 10
-    cortical_average_left = cortical_sum_left / 10
+    cortical_average_right = utils.column_average(corticalflow_right)
+    cortical_average_left = utils.column_average(corticalflow_left)
 
     fig, ((axLeft, axRight), (axLeftSq, axRightSq)) = plt.subplots(2, 2)
 

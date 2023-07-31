@@ -1,13 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import config
 from matplotlib.animation import FuncAnimation
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from pandas import DataFrame
 from typing import Sequence
 
-
-COLORS = ["blue", "orange", "green", "red"]
 
 def animate(euler_df: Sequence[DataFrame]):
     """
@@ -28,7 +27,7 @@ def animate(euler_df: Sequence[DataFrame]):
     # initialize 4 position vectors 
     positions_vectors = []
     for position_index in range(len(euler_df)):
-        color = COLORS[position_index]
+        color = config.COLORS[position_index]
         new_position, = AX.plot([],[],[],".", alpha=0.4, markersize=3, label=position_index+1, c=color)
         positions_vectors.append(new_position)
     
@@ -118,14 +117,13 @@ def update_replace(frame,
     rotation_axes[1].set_3d_properties([data[1]["z"][frame], data[3]["z"][frame]])
 
     
-def generate_ball(position: Sequence[float, float, float], radius: float):
+def generate_ball(position: tuple[float, float, float], radius: float):
     """
     Return evenly spaced coordinates on the sphere with center at position with radius radius.
     """
     
     delta = np.pi / 20
     rotation_matrix = np.array([[np.cos(delta), -np.sin(delta)], [np.sin(delta), np.cos(delta)]])
-
 
     center_x, center_y, center_z = position[0], position[1], position[2]
     curr_x, curr_y, curr_z = 0, 0, radius

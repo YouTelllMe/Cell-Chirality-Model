@@ -1,5 +1,5 @@
-venv
-raw_data
-other
-__pycache__
-model_output.*
+venv/
+raw_data/
+other/
+__pycache__/
+model_output.*/

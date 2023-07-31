@@ -26,6 +26,7 @@ PLOT_XYZ = os.path.join(CUR_DIR, "model_plot", "XYZ.png")
 PLOT_XZ = os.path.join(CUR_DIR, "model_plot", "XZ.png")
 PLOT_YZ = os.path.join(CUR_DIR, "model_plot", "YZ.png")
 PLOT_xzplot = os.path.join(CUR_DIR, "model_plot", "xzplot.png")
+PLOT_FIT_CORTICAL = os.path.join(CUR_DIR, "model_plot", "fit_cortical.png")
 #===========================================================================#
 "EULER + FIT"
 T_FINAL = 195 # final timestamp of raw data

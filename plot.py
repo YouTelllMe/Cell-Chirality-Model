@@ -3,8 +3,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import config
 import utils
+import numpy as np 
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from fit import fit 
+
    
 
 
@@ -160,5 +163,42 @@ def plot_fit():
 def plot_level_curves() -> None:
     """
     """
-    
-    pass
+    N = 30
+    A_step = 0.1
+    B_step = 0.001
+    A = 6.7
+    B = 0.04
+    A_range = np.array(range(0, N + 1)) * A_step + np.ones(N + 1) * A
+    B_range = np.array(range(0, N + 1)) * B_step + np.ones(N + 1) * B
+    A_range_neg = np.array(range(1, N)) * -A_step + np.ones(N - 1) * A
+    B_range_neg = np.array(range(1, N)) * -B_step + np.ones(N - 1) * B
+
+    A_all = np.concatenate((A_range_neg, A_range))
+    B_all = np.concatenate((B_range_neg, B_range))  
+
+    # read xlsx files
+    dorsal_xls = pd.ExcelFile(config.DORSAL_ANGLE_PATH)
+    anterior_xls = pd.ExcelFile(config.ANTERIOR_ANGLE_PATH)
+    # remove first two rows
+    dorsal = pd.read_excel(dorsal_xls, "dorsal")
+    anterior = pd.read_excel(anterior_xls, "anterior")
+    dorsal_anterior, dorsal_posterior, dorsal_t = utils.process_rawdf(dorsal, "Time(s)")
+    anterior_anterior, anterior_dorsal, anterior_t = utils.process_rawdf(anterior, "Time(s)")
+
+    residual_squared = []
+    for a in A_all: 
+        residual_squared.append([])
+        for b in B_all:
+            score = fit((a, b), anterior_anterior, anterior_dorsal, dorsal_anterior, dorsal_posterior)
+            residual_squared[-1].append(score)
+
+    fig1, ax = plt.subplots(layout='constrained')
+    contour = ax.contourf(B_all, A_all, residual_squared)
+    fig1.colorbar(contour)
+    plt.savefig(config.PLOT_LEVEL_CURVE)
+    plt.show()
+
+
+
+if __name__ == "__main__":
+    plot_level_curves()

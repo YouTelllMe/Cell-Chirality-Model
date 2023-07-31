@@ -12,6 +12,8 @@ from models import model_AB
 from plot import plot_all
 
 def run_euler(A: float, B: float) -> None:
+    """
+    """
     # takes 400 steps (initial position vector inclusive)
     N = config.MODEL_STEPS
     # t=0 not included in tau
@@ -28,6 +30,8 @@ def run_euler(A: float, B: float) -> None:
 
 
 def fit_model() -> tuple[float, float]:
+    """
+    """
     # read xlsx files
     dorsal_xls = pd.ExcelFile(config.DORSAL_ANGLE_PATH)
     anterior_xls = pd.ExcelFile(config.ANTERIOR_ANGLE_PATH)
@@ -48,5 +52,6 @@ def fit_model() -> tuple[float, float]:
 
 if __name__ == "__main__":
     A, B = fit_model()
+    print(A, B)
     run_euler(A, B)
     plot_all()

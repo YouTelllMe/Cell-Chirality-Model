@@ -23,6 +23,7 @@ PLOT_XZ = os.path.join(CUR_DIR, "model_plot", "XZ.png")
 PLOT_YZ = os.path.join(CUR_DIR, "model_plot", "YZ.png")
 PLOT_xzplot = os.path.join(CUR_DIR, "model_plot", "xzplot.png")
 PLOT_FIT_CORTICAL = os.path.join(CUR_DIR, "model_plot", "fit_cortical.png")
+PLOT_LEVEL_CURVE = os.path.join(CUR_DIR, "model_plot", "level_curve.png")
 #===========================================================================#
 "EULER + FIT"
 T_FINAL = 195 # final timestamp of raw data
@@ -30,7 +31,7 @@ DATA_STEPS = 40
 DATA_N = 10
 STEP_SCALE = 10
 MODEL_STEPS = DATA_STEPS * STEP_SCALE
-GUESS = (6.309078133216052, 0.037810656687541716)
+GUESS = (6.309078133216052, 0.037810656687541716) #6.739499413217986 0.040047325767577635
 #===========================================================================#
 "OTHER"
 COLORS = ["blue", "orange", "green", "red"] # colors for cells

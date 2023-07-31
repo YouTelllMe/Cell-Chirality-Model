@@ -12,7 +12,7 @@ from euler_method import euler
 from models import model_AB
 
 
-def fit(x, 
+def fit(x: tuple[float, float], 
         anterior_anterior: pd.DataFrame, 
         anterior_dorsal: pd.DataFrame, 
         dorsal_anterior: pd.DataFrame, 

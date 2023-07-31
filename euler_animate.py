@@ -22,15 +22,16 @@ def animate(euler_df: Sequence[DataFrame]):
     AX.set(ylim3d=(-SIZE, SIZE), ylabel='Y')
     AX.set(zlim3d=(-SIZE, SIZE), zlabel='Z')
 
-    steps = len(euler_df[0].index)
 
     # initialize 4 position vectors 
     positions_vectors = []
+    indecies = range(0, 400, 10)
     for position_index in range(len(euler_df)):
         color = config.COLORS[position_index]
         new_position, = AX.plot([],[],[],".", alpha=0.4, markersize=3, label=position_index+1, c=color)
         positions_vectors.append(new_position)
-    
+        euler_df[position_index] = euler_df[position_index].iloc[indecies].reset_index(drop=True)
+    steps = len(euler_df[0].index)
     AX.legend()
 
     # initialize axes of rotation
@@ -68,13 +69,13 @@ def animate(euler_df: Sequence[DataFrame]):
                          )
 
     # save animation from different angles
-    anim.save("XYZ.gif")
+    anim.save(config.PLOT_XYZ)
     AX.view_init(90, -90, 0)
-    anim.save("XY.gif")
+    anim.save(config.PLOT_XY)
     AX.view_init(0, -90, 0)
-    anim.save("XZ.gif")
+    anim.save(config.PLOT_XZ)
     AX.view_init(0, 0, 0)
-    anim.save("YZ.gif")
+    anim.save(config.PLOT_YZ)
 
 
 def update_replace(frame, 

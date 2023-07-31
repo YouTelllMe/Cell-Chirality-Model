@@ -14,7 +14,14 @@ def fit(x, anterior_anterior, anterior_dorsal, dorsal_anterior, dorsal_posterior
     # takes 399 steps (initial position vector is directly added during euler)
     tau = np.linspace(1/N, 1, N-1)
 
-    euler_data = euler(model_AB, np.array([-0.5,0.5,0.5, 0.5,0.5,0.5, -0.5,-0.5,0.5, 0.5,-0.5,0.5]), 1/N, tau, A, B, t_final)
+    euler_data = euler(model_AB, 
+                       np.array([-0.5,0.5,0.5, 0.5,0.5,0.5, -0.5,-0.5,0.5, 0.5,-0.5,0.5]), 
+                       1/N, 
+                       tau, 
+                       A, 
+                       B, 
+                       t_final, 
+                       False)
     
     computed_distances = euler_data[1]
     computed_angle = euler_data[2]

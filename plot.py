@@ -5,85 +5,150 @@ import config
 import utils
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-
-
-position_datapaths = [config.POSITION_1_DATAPATH,
-                      config.POSITION_2_DATAPATH,
-                      config.POSITION_3_DATAPATH,
-                      config.POSITION_4_DATAPATH]
-
-distances = pd.read_csv(config.DISTANCE_DATAPATH)
-angles = pd.read_csv(config.ANGLES_DATAPATH)
-
-
-fig, ((axX, axZ),(axDist, axDegree)) = plt.subplots(2, 2)
-axX.title.set_text("X Plot")
-axZ.title.set_text("Z Plot")
-axDist.title.set_text("Distances")
-axDegree.title.set_text("Theta vs Phi")
-
-for path_index in range(len(position_datapaths)):
-
-    df = pd.read_csv(position_datapaths[path_index])
-
-    color = config.COLORS[path_index % 4]
-    t = range(len(df))
-    x = df["x"]
-    z = df["z"]
-
-    axX.plot(t, x, "-o", label=path_index+1, c = color, markersize = 1)
-    axZ.plot(t, z, "-o", label=path_index+1, c = color, markersize = 1)
-
-
-t = range(len(distances))
-axDist.plot(t, distances["12"].to_numpy(), "-o", label="12", c="blue", markersize=1)
-axDist.plot(t, distances["13"].to_numpy(), "-o", label="13", c="orange", markersize=1)
-axDist.plot(t, distances["14"].to_numpy(), "-o", label="14", c="green", markersize=1)
-axDist.plot(t, distances["23"].to_numpy(), "-o", label="23", c="red", markersize=1)
-axDist.plot(t, distances["24"].to_numpy(), "-o", label="24", c="yellow", markersize=1)
-axDist.plot(t, distances["34"].to_numpy(), "-o", label="34", c="pink", markersize=1)
-
-
-# remove first two rows
-anterior_xls = pd.ExcelFile(config.ANTERIOR_ANGLE_PATH)
-dorsal_xls = pd.ExcelFile(config.DORSAL_ANGLE_PATH)
-
-anterior = pd.read_excel(anterior_xls, "anterior")
-anterior_anterior, anterior_dorsal, anterior_t = utils.process_rawdf(anterior, "Time(s)")
-
-dorsal = pd.read_excel(dorsal_xls, "dorsal")
-dorsal_anterior, dorsal_posterior, dorsal_t = utils.process_rawdf(dorsal, "Time(s)")
-
-axDegree.plot(angles["dorsal2"].to_numpy(), 
-              angles["anterior2"].to_numpy(), 
-              "-o", markersize=2, 
-              c="orange")
-for i in range(10):
-    axDegree.plot(dorsal_anterior.iloc[:,i].to_numpy(), 
-                  anterior_anterior.iloc[:,i].to_numpy(), 
-                  "-o", 
-                  markersize=2, 
-                  c="black", 
-                  alpha=0.4)
-    
-fig.set_figheight(7)
-fig.set_figwidth(15)
-axX.legend()
-axZ.legend()
-axDist.legend()
-plt.savefig("xzplot.png")
     
 
+def plot_distance(ax: Axes, data: pd.DataFrame) -> None:
+    """
+    Plots the inter-cell distances given the data on the given Axes. 
+    """
+    t = range(len(data))
+    ax.plot(t, data["12"].to_numpy(), "-o", label="12", c="blue", markersize=1)
+    ax.plot(t, data["13"].to_numpy(), "-o", label="13", c="orange", markersize=1)
+    ax.plot(t, data["14"].to_numpy(), "-o", label="14", c="green", markersize=1)
+    ax.plot(t, data["23"].to_numpy(), "-o", label="23", c="red", markersize=1)
+    ax.plot(t, data["24"].to_numpy(), "-o", label="24", c="yellow", markersize=1)
+    ax.plot(t, data["34"].to_numpy(), "-o", label="34", c="pink", markersize=1)
+    ax.legend()
 
 
-def plot_distance(Ax: Axes) -> None:
-    pass
+def plot_xz_plot(axX: Axes, axZ: Axes) -> None:
+    """
+    Plots the xz graph of the cell position-vectors on the given Axes.
+    """
+    position_datapaths = [config.POSITION_1_DATAPATH,
+                        config.POSITION_2_DATAPATH,
+                        config.POSITION_3_DATAPATH,
+                        config.POSITION_4_DATAPATH]
+    
+    # plots x and z coordinates of the model position vectors 
+    for path_index in range(len(position_datapaths)):
+        df = pd.read_csv(position_datapaths[path_index])
+        t = range(len(df))
+        x = df["x"]
+        z = df["z"]
+        color = config.COLORS[path_index % 4]
+        axX.plot(t, x, "-o", label=path_index+1, c = color, markersize = 1)
+        axZ.plot(t, z, "-o", label=path_index+1, c = color, markersize = 1)
 
-def plot_xz_plot(AXx: Axes | None, Axz: Axes | None) -> None:
-    pass
+    axX.legend()
+    axZ.legend()
 
-def plot_thetaphi(Ax: Axes) -> None:
-    pass
+
+def plot_thetaphi(ax: Axes, 
+                  angles_df: pd.DataFrame, 
+                  anterior_df: pd.DataFrame, 
+                  dorsal_df: pd.DataFrame
+                  ) -> None:
+    """
+    Plots the Theta (anterior) vs Phi (dorsal) graph on the given Axes. Assumes N=10. 
+    """
+    # process raw data
+    anterior_anterior, _, _ = utils.process_rawdf(anterior_df, "Time(s)")
+    dorsal_anterior, _, _ = utils.process_rawdf(dorsal_df, "Time(s)")
+
+    # plots model theta vs phi
+    ax.plot(angles_df["dorsal2"].to_numpy(), 
+                angles_df["anterior2"].to_numpy(), 
+                "-o", 
+                markersize=2, 
+                c="orange")
+    
+    # assuming n=10, plot data theta vs phi 
+    for i in range(10):
+        ax.plot(dorsal_anterior.iloc[:,i].to_numpy(), 
+                anterior_anterior.iloc[:,i].to_numpy(), 
+                "-o", 
+                markersize=2, 
+                c="black", 
+                alpha=0.4)
+
 
 def plot_all() -> None:
-    pass
+    """
+    Plots the distance, xz, thetaphi, fit plots from the model_output data folder. 
+    """
+
+    # read distance data
+    distances = pd.read_csv(config.DISTANCE_DATAPATH)
+    # read angles data
+    angles = pd.read_csv(config.ANGLES_DATAPATH)
+    anterior_xls = pd.ExcelFile(config.ANTERIOR_ANGLE_PATH)
+    dorsal_xls = pd.ExcelFile(config.DORSAL_ANGLE_PATH)
+    anterior = pd.read_excel(anterior_xls, "anterior")
+    dorsal = pd.read_excel(dorsal_xls, "dorsal")
+
+    # initialize figure and axes, set configs
+    fig, ((axX, axZ),(axDist, axDegree)) = plt.subplots(2, 2)
+    fig.set_figheight(7)
+    fig.set_figwidth(15)
+    axX.title.set_text("X Plot")
+    axZ.title.set_text("Z Plot")
+    axDist.title.set_text("Distances")
+    axDegree.title.set_text("Theta vs Phi")
+
+    # run plotting helper functions; saves figure
+    plot_distance(axDist, distances)
+    plot_thetaphi(axDegree, angles, anterior, dorsal)
+    plot_xz_plot(axX, axZ)
+    plt.savefig(config.PLOT_xzplot)
+    plot_fit()
+
+
+def plot_fit():
+    """
+    Plot model fit against raw data. 
+    """
+    # read xlsx files
+    dorsal_xls = pd.ExcelFile(config.DORSAL_ANGLE_PATH)
+    anterior_xls = pd.ExcelFile(config.ANTERIOR_ANGLE_PATH)
+    # remove first two rows
+    dorsal = pd.read_excel(dorsal_xls, "dorsal")
+    anterior = pd.read_excel(anterior_xls, "anterior")
+    dorsal_anterior, dorsal_posterior, dorsal_t = utils.process_rawdf(dorsal, "Time(s)")
+    anterior_anterior, anterior_dorsal, anterior_t = utils.process_rawdf(anterior, "Time(s)")
+    # average angles for plotting
+    da_average = utils.column_average(dorsal_anterior)
+    dp_average = utils.column_average(dorsal_posterior)
+    aa_averege = utils.column_average(anterior_anterior)
+    ad_average = utils.column_average(anterior_dorsal)
+    # load data
+    computed_angle = pd.read_csv(config.ANGLES_DATAPATH)
+    computed_data_index = range(0, 400, 10)
+    computed_dorsal_1 = computed_angle["dorsal1"][computed_data_index].to_numpy()
+    computed_dorsal_2 = computed_angle["dorsal2"][computed_data_index].to_numpy()
+    computed_anterior_1 = computed_angle["anterior1"][computed_data_index].to_numpy()
+    computed_anterior_2 = computed_angle["anterior2"][computed_data_index].to_numpy()
+    # initialize graph, set Axes titles 
+    fig, ((axDA, axDP),(axAA, axAD)) = plt.subplots(2, 2)
+    fig.set_figheight(7)
+    fig.set_figwidth(15)
+    axDA.title.set_text("Dorsal Angle - Anterior Axis")
+    axDP.title.set_text("Dorsal Angle - Posterior Axis")
+    axAA.title.set_text("Anterior Angle - Anterior Axis")
+    axAD.title.set_text("Anterior Angle - Posterior Axis")
+    # plot datas
+    axDA.plot(dorsal_t, computed_dorsal_2, label="model", markersize=2)
+    axDA.plot(dorsal_t, da_average, label="average data", markersize=2)
+    axDP.plot(dorsal_t, computed_dorsal_1, label="model", markersize=2)
+    axDP.plot(dorsal_t, dp_average, label="average data", markersize=2)
+    axAA.plot(anterior_t, computed_anterior_2, label="model", markersize=2)
+    axAA.plot(anterior_t, aa_averege, label="average data", markersize=2)
+    axAD.plot(anterior_t, computed_anterior_1, label="model", markersize=2)
+    axAD.plot(anterior_t, ad_average, label="average data", markersize=2)
+    # plot legend
+    axDA.legend()
+    axDP.legend()
+    axAA.legend()
+    axAD.legend()
+    # save figure
+    plt.savefig(config.PLOT_FIT)

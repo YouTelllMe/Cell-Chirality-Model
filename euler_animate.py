@@ -22,15 +22,14 @@ def animate(euler_df: Sequence[DataFrame]):
     AX.set(ylim3d=(-SIZE, SIZE), ylabel='Y')
     AX.set(zlim3d=(-SIZE, SIZE), zlabel='Z')
 
-
     # initialize 4 position vectors 
     positions_vectors = []
-    indecies = range(0, 400, 10)
+    animated_indicies = range(0, config.MODEL_STEPS, config.STEP_SCALE)
     for position_index in range(len(euler_df)):
         color = config.COLORS[position_index]
         new_position, = AX.plot([],[],[],".", alpha=0.4, markersize=3, label=position_index+1, c=color)
         positions_vectors.append(new_position)
-        euler_df[position_index] = euler_df[position_index].iloc[indecies].reset_index(drop=True)
+        euler_df[position_index] = euler_df[position_index].iloc[animated_indicies].reset_index(drop=True)
     steps = len(euler_df[0].index)
     AX.legend()
 

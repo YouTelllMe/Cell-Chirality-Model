@@ -12,18 +12,16 @@ from models import model_AB
 from plot import plot_all
 
 def run_euler(A: float, B: float) -> None:
-    # initial point not included within tau
-    t_final = 195
-    # takes 399 steps (initial position vector is given)
-    N = 400
+    # takes 400 steps (initial position vector inclusive)
+    N = config.MODEL_STEPS
+    # t=0 not included in tau
     tau = np.linspace(1/N, 1, N-1)
     euler_df = euler(model_AB, 
                      np.array([-0.5,0.5,0.5, 0.5,0.5,0.5, -0.5,-0.5,0.5, 0.5,-0.5,0.5]), 
                      1/N, 
                      tau, 
                      A, 
-                     B, 
-                     t_final,
+                     B,
                      True)[0]
     animate(euler_df)
     plt.show()
@@ -40,13 +38,12 @@ def fit_model() -> tuple[float, float]:
     anterior_anterior, anterior_dorsal, anterior_t = utils.process_rawdf(anterior, "Time(s)")
         
     A, B = scipy.optimize.fmin(fit, 
-                              [6.309078133216052, 0.037810656687541716], 
+                               config.GUESS, 
                                args=(anterior_anterior, 
                                      anterior_dorsal,
                                      dorsal_anterior, 
                                      dorsal_posterior, 
                                      ))
-    
     return (A, B)
 
 if __name__ == "__main__":

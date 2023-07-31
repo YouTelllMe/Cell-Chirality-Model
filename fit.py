@@ -12,13 +12,17 @@ from euler_method import euler
 from models import model_AB
 
 
-
-def fit(x, anterior_anterior, anterior_dorsal, dorsal_anterior, dorsal_posterior):
+def fit(x, 
+        anterior_anterior: pd.DataFrame, 
+        anterior_dorsal: pd.DataFrame, 
+        dorsal_anterior: pd.DataFrame, 
+        dorsal_posterior: pd.DataFrame):
+    """
+    """
     # initial point not included within tau
-    t_final = 195
     A, B = x
-    N = 400
-    # takes 399 steps (initial position vector is directly added during euler)
+    N = config.MODEL_STEPS
+    # takes 400 steps (initial position vector inclusive)
     tau = np.linspace(1/N, 1, N-1)
 
     euler_data = euler(model_AB, 
@@ -27,19 +31,18 @@ def fit(x, anterior_anterior, anterior_dorsal, dorsal_anterior, dorsal_posterior
                        tau, 
                        A, 
                        B, 
-                       t_final, 
                        False)
     
     computed_distances = euler_data[1]
     computed_angle = euler_data[2]
 
-    computed_data_index = range(0, 400, 10)
+    computed_data_index = range(0, config.MODEL_STEPS, config.STEP_SCALE)
     computed_dorsal_1 = computed_angle["dorsal1"][computed_data_index].to_numpy()
     computed_dorsal_2 = computed_angle["dorsal2"][computed_data_index].to_numpy()
     computed_anterior_1 = computed_angle["anterior1"][computed_data_index].to_numpy()
     computed_anterior_2 = computed_angle["anterior2"][computed_data_index].to_numpy()
     residual_square = 0
-    for column_index in range(10):
+    for column_index in range(config.DATA_N):
         da_residual = dorsal_anterior.iloc[:,column_index].to_numpy() - computed_dorsal_2
         dp_residual = dorsal_posterior.iloc[:,column_index].to_numpy() - computed_dorsal_1
         aa_residual = anterior_anterior.iloc[:,column_index].to_numpy() - computed_anterior_2
@@ -84,17 +87,22 @@ def fit_cortical_func(x: tuple[float, float], time: Sequence, data: pd.DataFrame
         output = alpha * time**2 * np.e**(-lam * time)
 
     residual_squared = 0 
-    for column_index in range(10):
+    for column_index in range(config.DATA_N):
         residual_squared += np.linalg.norm(data.iloc[:, column_index] - output) ** 2
     
     return residual_squared
 
 
-def fit_cortical():
+def fit_cortical() -> None:
+    """
+    Fit cortical data to αte^(-λt)
+    """
+
     # read cortical file; drop first row (column index) and reset row index
     corticalflow_xls = pd.ExcelFile(config.CORTICALFLOW_PATH)
     corticalflow = pd.read_excel(corticalflow_xls, "corticalflow")
 
+    # process raw_data, absolute value negative cortical flow for fitting
     corticalflow_right, corticalflow_left, time = utils.process_rawdf(corticalflow, "Time (s)")
     corticalflow_left = corticalflow_left.apply(lambda x: abs(x))
     
@@ -106,8 +114,8 @@ def fit_cortical():
     cortical_average_right = utils.column_average(corticalflow_right)
     cortical_average_left = utils.column_average(corticalflow_left)
 
+    # initialize figure and plot
     fig, (axLeft, axRight) = plt.subplots(1, 2)
-
     axLeft.plot(time, cortical_average_left)
     axLeft.plot(time, np.multiply(alpha_l*time,np.e**(-lambda_l * time)))
     axLeft.plot(time, np.multiply(0.000527*time,np.e**(-0.01466569 * time)))

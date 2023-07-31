@@ -5,8 +5,41 @@ import config
 import utils
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-    
+   
 
+
+def plot_all() -> None:
+    """
+    Plots the distance, xz, thetaphi, fit plots from the model_output data folder. 
+    """
+
+    # read distance data
+    distances = pd.read_csv(config.DISTANCE_DATAPATH)
+    # read angles data
+    angles = pd.read_csv(config.ANGLES_DATAPATH)
+    anterior_xls = pd.ExcelFile(config.ANTERIOR_ANGLE_PATH)
+    dorsal_xls = pd.ExcelFile(config.DORSAL_ANGLE_PATH)
+    anterior = pd.read_excel(anterior_xls, "anterior")
+    dorsal = pd.read_excel(dorsal_xls, "dorsal")
+
+    # initialize figure and axes, set configs
+    fig, ((axX, axZ),(axDist, axDegree)) = plt.subplots(2, 2)
+    fig.set_figheight(7)
+    fig.set_figwidth(15)
+    axX.title.set_text("X Plot")
+    axZ.title.set_text("Z Plot")
+    axDist.title.set_text("Distances")
+    axDegree.title.set_text("Theta vs Phi")
+
+    # run plotting helper functions; saves figure
+    plot_distance(axDist, distances)
+    plot_thetaphi(axDegree, angles, anterior, dorsal)
+    plot_xz_plot(axX, axZ)
+    plt.savefig(config.PLOT_xzplot)
+
+    plot_fit()
+
+   
 def plot_distance(ax: Axes, data: pd.DataFrame) -> None:
     """
     Plots the inter-cell distances given the data on the given Axes. 
@@ -50,7 +83,7 @@ def plot_thetaphi(ax: Axes,
                   dorsal_df: pd.DataFrame
                   ) -> None:
     """
-    Plots the Theta (anterior) vs Phi (dorsal) graph on the given Axes. Assumes N=10. 
+    Plots the Theta (anterior) vs Phi (dorsal) graph on the given Axes.
     """
     # process raw data
     anterior_anterior, _, _ = utils.process_rawdf(anterior_df, "Time(s)")
@@ -63,45 +96,14 @@ def plot_thetaphi(ax: Axes,
                 markersize=2, 
                 c="orange")
     
-    # assuming n=10, plot data theta vs phi 
-    for i in range(10):
+    # plot data theta vs phi 
+    for i in range(config.DATA_N):
         ax.plot(dorsal_anterior.iloc[:,i].to_numpy(), 
                 anterior_anterior.iloc[:,i].to_numpy(), 
                 "-o", 
                 markersize=2, 
                 c="black", 
                 alpha=0.4)
-
-
-def plot_all() -> None:
-    """
-    Plots the distance, xz, thetaphi, fit plots from the model_output data folder. 
-    """
-
-    # read distance data
-    distances = pd.read_csv(config.DISTANCE_DATAPATH)
-    # read angles data
-    angles = pd.read_csv(config.ANGLES_DATAPATH)
-    anterior_xls = pd.ExcelFile(config.ANTERIOR_ANGLE_PATH)
-    dorsal_xls = pd.ExcelFile(config.DORSAL_ANGLE_PATH)
-    anterior = pd.read_excel(anterior_xls, "anterior")
-    dorsal = pd.read_excel(dorsal_xls, "dorsal")
-
-    # initialize figure and axes, set configs
-    fig, ((axX, axZ),(axDist, axDegree)) = plt.subplots(2, 2)
-    fig.set_figheight(7)
-    fig.set_figwidth(15)
-    axX.title.set_text("X Plot")
-    axZ.title.set_text("Z Plot")
-    axDist.title.set_text("Distances")
-    axDegree.title.set_text("Theta vs Phi")
-
-    # run plotting helper functions; saves figure
-    plot_distance(axDist, distances)
-    plot_thetaphi(axDegree, angles, anterior, dorsal)
-    plot_xz_plot(axX, axZ)
-    plt.savefig(config.PLOT_xzplot)
-    plot_fit()
 
 
 def plot_fit():
@@ -123,7 +125,7 @@ def plot_fit():
     ad_average = utils.column_average(anterior_dorsal)
     # load data
     computed_angle = pd.read_csv(config.ANGLES_DATAPATH)
-    computed_data_index = range(0, 400, 10)
+    computed_data_index = range(0, config.MODEL_STEPS, config.STEP_SCALE)
     computed_dorsal_1 = computed_angle["dorsal1"][computed_data_index].to_numpy()
     computed_dorsal_2 = computed_angle["dorsal2"][computed_data_index].to_numpy()
     computed_anterior_1 = computed_angle["anterior1"][computed_data_index].to_numpy()
@@ -152,3 +154,11 @@ def plot_fit():
     axAD.legend()
     # save figure
     plt.savefig(config.PLOT_FIT)
+
+
+
+def plot_level_curves() -> None:
+    """
+    """
+    
+    pass

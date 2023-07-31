@@ -1,9 +1,5 @@
 import os 
 
-
-
-
-
 #===========================================================================#
 "PATHS"
 # curr dir
@@ -30,9 +26,11 @@ PLOT_FIT_CORTICAL = os.path.join(CUR_DIR, "model_plot", "fit_cortical.png")
 #===========================================================================#
 "EULER + FIT"
 T_FINAL = 195 # final timestamp of raw data
-DATA_N = 10 # 
-MODEL_STEPS = 400 
-GUESS = []
+DATA_STEPS = 40
+DATA_N = 10
+STEP_SCALE = 10
+MODEL_STEPS = DATA_STEPS * STEP_SCALE
+GUESS = (6.309078133216052, 0.037810656687541716)
 #===========================================================================#
 "OTHER"
 COLORS = ["blue", "orange", "green", "red"] # colors for cells

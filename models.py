@@ -1,11 +1,14 @@
 import numpy as np
+import config
 
 
-def model_AB(curr_pos, A, B, time, t_final, diag14: bool, diag23: bool):
+def model_AB(curr_pos, A, B, time, diag14: bool, diag23: bool):
     """
     4 cell model physics system, used as "func" for Euler
     """
     
+    t_final = config.T_FINAL
+
     # position vectors
     p1 = np.array([curr_pos[0], curr_pos[1], curr_pos[2]])
     p2 = np.array([curr_pos[3], curr_pos[4], curr_pos[5]])

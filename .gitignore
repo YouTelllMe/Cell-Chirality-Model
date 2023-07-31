@@ -2,4 +2,4 @@ venv/
 raw_data/
 other/
 __pycache__/
-model_output.*/
+model_output/*

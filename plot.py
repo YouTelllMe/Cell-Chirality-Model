@@ -163,9 +163,9 @@ def plot_fit():
 def plot_level_curves() -> None:
     """
     """
-    N = 30
-    A_step = 0.1
-    B_step = 0.001
+    N = 15
+    A_step = 0.2
+    B_step = 0.002
     A = 6.7
     B = 0.04
     A_range = np.array(range(0, N + 1)) * A_step + np.ones(N + 1) * A
@@ -193,7 +193,11 @@ def plot_level_curves() -> None:
             residual_squared[-1].append(score)
 
     fig1, ax = plt.subplots(layout='constrained')
-    contour = ax.contourf(B_all, A_all, residual_squared)
+    contour = ax.contourf(B_all, 
+                          A_all, 
+                          residual_squared, 
+                          config.BINS_LEVEL_CURVES,
+                          colors = config.COLORS_LEVEL_CURVES)
     fig1.colorbar(contour)
     plt.savefig(config.PLOT_LEVEL_CURVE)
     plt.show()

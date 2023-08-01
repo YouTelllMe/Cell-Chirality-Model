@@ -62,6 +62,53 @@ def fit(x: tuple[float, float],
     return residual_square
 
 
+
+def fit_model_curve(x: Sequence[float], A: float, B: float):
+    """
+    """
+    # initial point not included within tau
+    N = config.MODEL_STEPS
+    # takes 400 steps (initial position vector inclusive)
+    tau = np.linspace(1/N, 1, N-1)
+    initial_vector = np.array([-0.5,0.5,0.5, 0.5,0.5,0.5, -0.5,-0.5,0.5, 0.5,-0.5,0.5])
+    euler_data = euler(model_AB, 
+                       initial_vector, 
+                       1/N, 
+                       tau, 
+                       A, 
+                       B, 
+                       False)
+    
+    indicies = range(0, config.MODEL_STEPS, config.STEP_SCALE)
+    distance_df = euler_data[1].iloc[indicies].reset_index(drop=True)
+    angle_df = euler_data[2].iloc[indicies].reset_index(drop=True)
+    epsilon = 1
+
+    dorsal_anterior = angle_df["dorsal2"]
+    dorsal_posterior = angle_df["dorsal1"]
+    anterior_anterior = angle_df["anterior2"]
+    anterior_dorsal = angle_df["anterior1"]
+
+    
+    computed_instance_N = []
+    for angle_type in (dorsal_anterior, dorsal_posterior, anterior_anterior, anterior_dorsal):
+        for _ in range(config.DATA_N):
+            computed_instance_N = np.concatenate((computed_instance_N, angle_type))
+
+    computed_instance_N = np.concatenate((computed_instance_N, 
+                                          distance_df["12"],
+                                          distance_df["13"],
+                                          distance_df["24"],
+                                          distance_df["34"]))
+    return computed_instance_N
+
+if __name__ == "__main__":
+    fit_model_curve([], 6.7, 0.04)
+
+
+#=======================================================================================================================#
+"CORTICAL FLOW"
+
 @dataclass
 class CorticalFlowFit(Enum):
     LINEAR = auto()
@@ -126,5 +173,3 @@ def fit_cortical() -> None:
 
     # print average fit coefficients 
     print((alpha_r+alpha_l)/2, (lambda_r+lambda_l)/2)
-
-

@@ -25,3 +25,19 @@ def column_average(df: pd.DataFrame) -> np.ndarray:
         col_sum += df.iloc[:,column].to_numpy()
     col_average = col_sum / num_cols
     return col_average
+
+
+def get_data():
+    """
+    """
+    # read xlsx files
+    dorsal_xls = pd.ExcelFile(config.DORSAL_ANGLE_PATH)
+    anterior_xls = pd.ExcelFile(config.ANTERIOR_ANGLE_PATH)
+    # remove first two rows
+    dorsal = pd.read_excel(dorsal_xls, "dorsal")
+    anterior = pd.read_excel(anterior_xls, "anterior")
+    dorsal_anterior, dorsal_posterior, dorsal_t = process_rawdf(dorsal, "Time(s)")
+    anterior_anterior, anterior_dorsal, anterior_t = process_rawdf(anterior, "Time(s)")
+
+    return(dorsal_anterior, dorsal_posterior, dorsal_t, 
+           anterior_anterior, anterior_dorsal, anterior_t)

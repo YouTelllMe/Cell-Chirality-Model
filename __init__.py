@@ -4,3 +4,4 @@ import euler_method
 import fit
 import models
 import plot
+import stats

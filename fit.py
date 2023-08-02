@@ -10,7 +10,70 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from euler_method import euler
 from models import model_AB
+import scipy.stats.t as t
 
+
+def fit_modelAB(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
+                         pd.DataFrame, pd.DataFrame, pd.DataFrame] | None = None) -> tuple[float, float]:
+    """
+    """
+
+    if data is None:
+        data = utils.get_data()
+    (dorsal_anterior, 
+    dorsal_posterior, 
+    dorsal_t,
+    anterior_anterior, 
+    anterior_dorsal, 
+    anterior_t) = data
+        
+    A, B = scipy.optimize.fmin(fit, 
+                               config.GUESS, 
+                               args=(anterior_anterior, 
+                                     anterior_dorsal,
+                                     dorsal_anterior, 
+                                     dorsal_posterior, 
+                                     ))
+    return (A, B)
+
+
+def fit_model_whole(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
+                         pd.DataFrame, pd.DataFrame, pd.DataFrame] | None = None):
+    """
+    """
+
+    # takes 400 steps (initial position vector inclusive)
+    N = config.MODEL_STEPS
+    tau = np.linspace(1/N, 1, N-1)
+
+    if data is None:
+        data = utils.get_data()
+    (dorsal_anterior, 
+    dorsal_posterior, 
+    dorsal_t,
+    anterior_anterior, 
+    anterior_dorsal, 
+    anterior_t) = data
+
+    manual_distances = np.ones(160)
+    dorsal_anterior = dorsal_anterior.to_numpy().flatten("F")
+    dorsal_posterior = dorsal_posterior.to_numpy().flatten("F")
+    anterior_anterior = anterior_anterior.to_numpy().flatten("F")
+    anterior_dorsal = anterior_dorsal.to_numpy().flatten("F")
+
+    y_data = np.concatenate((dorsal_anterior, dorsal_posterior, anterior_anterior, anterior_dorsal, manual_distances))
+    x_data = ()
+
+    popt, pcov = scipy.optimize.curve_fit(fit_model_curve, x_data, y_data, p0=config.GUESS)
+
+    alpha = 0.05 # 95% confidence interval = 100*(1-alpha)
+    n = len(y_data)    # number of data points
+    p = len(popt) # number of parameters
+    df = max(0, n - p) # number of degrees of freedom
+    tval = t.ppf(1.0-alpha/2., df) # student-t value for the df and confidence level
+
+    return (popt, pcov, ((np.diag(pcov)[0]**0.5)*tval,
+                         (np.diag(pcov)[1]**0.5)*tval))
 
 def fit(x: tuple[float, float], 
         anterior_anterior: pd.DataFrame, 

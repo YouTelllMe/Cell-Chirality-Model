@@ -113,14 +113,13 @@ def plot_fit():
     """
     Plot model fit against raw data. 
     """
-    # read xlsx files
-    dorsal_xls = pd.ExcelFile(config.DORSAL_ANGLE_PATH)
-    anterior_xls = pd.ExcelFile(config.ANTERIOR_ANGLE_PATH)
-    # remove first two rows
-    dorsal = pd.read_excel(dorsal_xls, "dorsal")
-    anterior = pd.read_excel(anterior_xls, "anterior")
-    dorsal_anterior, dorsal_posterior, dorsal_t = utils.process_rawdf(dorsal, "Time(s)")
-    anterior_anterior, anterior_dorsal, anterior_t = utils.process_rawdf(anterior, "Time(s)")
+    (dorsal_anterior, 
+     dorsal_posterior, 
+     dorsal_t,
+     anterior_anterior, 
+     anterior_dorsal, 
+     anterior_t) = utils.get_data()
+    
     # average angles for plotting
     da_average = utils.column_average(dorsal_anterior)
     dp_average = utils.column_average(dorsal_posterior)
@@ -163,9 +162,9 @@ def plot_fit():
 def plot_level_curves() -> None:
     """
     """
-    N = 15
-    A_step = 0.2
-    B_step = 0.002
+    N = 20
+    A_step = 0.1
+    B_step = 0.001
     A = 6.7
     B = 0.04
     A_range = np.array(range(0, N + 1)) * A_step + np.ones(N + 1) * A
@@ -176,14 +175,12 @@ def plot_level_curves() -> None:
     A_all = np.concatenate((A_range_neg, A_range))
     B_all = np.concatenate((B_range_neg, B_range))  
 
-    # read xlsx files
-    dorsal_xls = pd.ExcelFile(config.DORSAL_ANGLE_PATH)
-    anterior_xls = pd.ExcelFile(config.ANTERIOR_ANGLE_PATH)
-    # remove first two rows
-    dorsal = pd.read_excel(dorsal_xls, "dorsal")
-    anterior = pd.read_excel(anterior_xls, "anterior")
-    dorsal_anterior, dorsal_posterior, dorsal_t = utils.process_rawdf(dorsal, "Time(s)")
-    anterior_anterior, anterior_dorsal, anterior_t = utils.process_rawdf(anterior, "Time(s)")
+    (dorsal_anterior, 
+     dorsal_posterior, 
+     dorsal_t,
+     anterior_anterior, 
+     anterior_dorsal, 
+     anterior_t) = utils.get_data()
 
     residual_squared = []
     for a in A_all: 

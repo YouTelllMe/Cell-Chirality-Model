@@ -6,6 +6,23 @@ import matplotlib.pyplot as plt
 import config
 from typing import Callable
 
+def run_euler(A: float, B: float) -> None:
+    """
+    """
+    # takes 400 steps (initial position vector inclusive)
+    N = config.MODEL_STEPS
+    # t=0 not included in tau
+    tau = np.linspace(1/N, 1, N-1)
+    euler_df = euler(model_AB, 
+                     np.array([-0.5,0.5,0.5, 0.5,0.5,0.5, -0.5,-0.5,0.5, 0.5,-0.5,0.5]), 
+                     1/N, 
+                     tau, 
+                     A, 
+                     B,
+                     True)[0]
+    animate(euler_df)
+    plt.show()
+
 
 def euler(func: Callable, 
           start_vec: tuple[float, float, float, float, float, float, float, float, float, float, float, float], 

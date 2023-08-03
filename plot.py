@@ -6,7 +6,9 @@ import utils
 import numpy as np 
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from fit import fit 
+from matplotlib.patches import Rectangle
+from fit import fit_model_whole
+from stats import resample_ci
 
 
 
@@ -159,44 +161,51 @@ def plot_fit():
 def plot_level_curves() -> None:
     """
     """
-    N = 20
-    A_step = 0.1
-    B_step = 0.001
-    A = 6.7
-    B = 0.04
-    A_range = np.array(range(0, N + 1)) * A_step + np.ones(N + 1) * A
-    B_range = np.array(range(0, N + 1)) * B_step + np.ones(N + 1) * B
-    A_range_neg = np.array(range(1, N)) * -A_step + np.ones(N - 1) * A
-    B_range_neg = np.array(range(1, N)) * -B_step + np.ones(N - 1) * B
 
-    A_all = np.concatenate((A_range_neg, A_range))
-    B_all = np.concatenate((B_range_neg, B_range))  
+    residual_squared_df = pd.read_csv(config.RESIDUAL_SQUARED_DATAPATH)
+    A_all = residual_squared_df["A"].to_numpy()
+    B_all = residual_squared_df["B"].to_numpy()
+    residual_squared_df.drop(columns=["A", "B"], inplace=True)
+    residual_squared = residual_squared_df.to_numpy()
 
-    (dorsal_anterior, 
-     dorsal_posterior, 
-     dorsal_t,
-     anterior_anterior, 
-     anterior_dorsal, 
-     anterior_t) = utils.get_data()
+    fig1, ax = plt.subplots()
 
-    residual_squared = []
-    for a in A_all: 
-        residual_squared.append([])
-        for b in B_all:
-            score = fit((a, b), anterior_anterior, anterior_dorsal, dorsal_anterior, dorsal_posterior)
-            residual_squared[-1].append(score)
+    colors = []
+    color_interval = 1 / len(config.LEVEL_CURVE_BINS)
+    for color_index in range(len(config.LEVEL_CURVE_BINS)):
+        color_val = color_index * color_interval
+        colors.append((color_val, color_val, color_val))
 
-    fig1, ax = plt.subplots(layout='constrained')
     contour = ax.contourf(B_all, 
                           A_all, 
                           residual_squared, 
-                          config.BINS_LEVEL_CURVES,
-                          colors = config.COLORS_LEVEL_CURVES)
+                          config.LEVEL_CURVE_BINS,
+                          colors = colors)
+    resample_CI = resample_ci(0.95)
+    resample_patch = Rectangle((resample_CI[1][0], resample_CI[0][0]), 
+                                   resample_CI[1][1]-resample_CI[1][0], 
+                                   resample_CI[0][1]-resample_CI[0][0], 
+                                   linewidth=1,
+                                   edgecolor="r",
+                                   facecolor="none",
+                                   label="resample confidence")
+    AB, cov_matrix, AB_uncertainty = fit_model_whole()
+    model_fit_patch = Rectangle((AB[1] - AB_uncertainty[1], AB[0] - AB_uncertainty[0]), 
+                                   AB_uncertainty[1] * 2, 
+                                   AB_uncertainty[0] * 2, 
+                                   linewidth=1,
+                                   edgecolor="g",
+                                   facecolor="none",
+                                   label="curve fit confidence")
+    
+    ax.add_patch(resample_patch)
+    ax.add_patch(model_fit_patch)
+    ax.plot(AB[1], AB[0], "o", color = "g", markersize=5, label="curve fit best")
+    ax.annotate(f"({round(AB[1], 3)},{round(AB[0], 2)})", xy=(AB[1], AB[0]), color = "g")
+    ax.legend()
     fig1.colorbar(contour)
     plt.savefig(config.PLOT_LEVEL_CURVE)
     plt.show()
-
-
 
 if __name__ == "__main__":
     plot_level_curves()

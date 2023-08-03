@@ -6,7 +6,7 @@ import config
 from collections.abc import Sequence
 import pandas as pd
 import random 
-from fit import fit_model_whole
+from fit import fit_model_whole, fit
 from collections.abc import Sequence
 
 
@@ -30,7 +30,7 @@ def resample_ci(CI: int = 0.95,
     n_folds = len(A_n)
     CI_side = int((1 - CI) / 2 * n_folds)
     A_n_sorted = np.sort(A_n)
-    B_n_sorted = np.sort(A_n)
+    B_n_sorted = np.sort(B_n)
 
     # indexing a bit tricky here
     A_CI = [A_n_sorted[CI_side], A_n_sorted[-CI_side-1]]
@@ -39,7 +39,8 @@ def resample_ci(CI: int = 0.95,
     return(A_CI, B_CI)
 
 
-def resample_n(n_folds: int = 10):
+def resample_n(n_folds: int = 10,
+               save: bool = False):
     """
     """
     original_data = utils.get_data()
@@ -56,9 +57,10 @@ def resample_n(n_folds: int = 10):
         print(f"fold {fold_index}: {resampled_A}, {resampled_B}")
         A_n.append(resampled_A)
         B_n.append(resampled_B)
-
-    resample_df = pd.DataFrame(data={"A":A_n, "B":B_n})
-    resample_df.to_csv(config.RESAMPLE_DATAPATH)
+    
+    if save:
+        resample_df = pd.DataFrame(data={"A":A_n, "B":B_n})
+        resample_df.to_csv(config.RESAMPLE_DATAPATH)
     return(A_n, B_n)
 
 
@@ -142,5 +144,40 @@ def residuals(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
     return residuals
 
 
+def get_residual_squared() -> None:
+    """
+    """
+    N = 20
+    A_step = 0.1
+    B_step = 0.001
+    A = 6.7
+    B = 0.04
+    A_range = np.array(range(0, N + 1)) * A_step + np.ones(N + 1) * A
+    B_range = np.array(range(0, N + 1)) * B_step + np.ones(N + 1) * B
+    A_range_neg = np.array(range(1, N)) * -A_step + np.ones(N - 1) * A
+    B_range_neg = np.array(range(1, N)) * -B_step + np.ones(N - 1) * B
+
+    A_all = np.concatenate((A_range_neg, A_range))
+    B_all = np.concatenate((B_range_neg, B_range))  
+
+    (dorsal_anterior, 
+     dorsal_posterior, 
+     dorsal_t,
+     anterior_anterior, 
+     anterior_dorsal, 
+     anterior_t) = utils.get_data()
+
+    residual_squared = np.zeros((len(A_all), len(B_all)))
+    for a_index in range(len(A_all)): 
+        for b_index in range(len(B_all)):
+            score = fit((A_all[a_index], B_all[b_index]), 
+                        anterior_anterior, anterior_dorsal, dorsal_anterior, dorsal_posterior)
+            residual_squared[a_index][b_index] = score
+
+    residual_squared_df = pd.DataFrame(data=residual_squared)
+    residual_squared_df["A"] = A_all
+    residual_squared_df["B"] = B_all
+    residual_squared_df.to_csv(config.RESIDUAL_SQUARED_DATAPATH, index=False)
+
 if __name__ == "__main__":
-    print(resample_ci(0.95, resample_n(100)))
+    get_residual_squared()

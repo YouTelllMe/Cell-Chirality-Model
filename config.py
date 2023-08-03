@@ -12,6 +12,7 @@ POSITION_2_DATAPATH = os.path.join(CUR_DIR, "model_output", "data_2.csv")
 POSITION_3_DATAPATH = os.path.join(CUR_DIR, "model_output", "data_3.csv")
 POSITION_4_DATAPATH = os.path.join(CUR_DIR, "model_output", "data_4.csv")
 RESAMPLE_DATAPATH = os.path.join(CUR_DIR, "model_output", "resample_AB.csv")
+RESIDUAL_SQUARED_DATAPATH = os.path.join(CUR_DIR, "model_output", "residual_squared.csv")
 # raw data
 ANTERIOR_ANGLE_PATH = os.path.join(CUR_DIR, "raw_data", "anterior.xlsx")
 CORTICALFLOW_PATH = os.path.join(CUR_DIR, "raw_data", "corticalflow.xlsx")
@@ -36,8 +37,7 @@ GUESS = (6.309078133216052, 0.037810656687541716) #6.739499413217986 0.040047325
 #===========================================================================#
 "OTHER"
 COLORS = ["blue", "orange", "green", "red"] # colors for cells
-COLORS_LEVEL_CURVES = [(1,0.5,0.5), (1,0,0), (1,0.5,0), (1,1,0), (0.5,1,0), (0,1,0), (0,1,0.5), (0,1,1), (0,0.5,1), (0,0,1), (0,0,0.5),]
-BINS_LEVEL_CURVES = [154000, 156000, 158000, 160000, 170000, 180000, 190000, 200000, 250000, 300000, 350000, 400000]
+LEVEL_CURVE_BINS = [154000, 156000, 158000, 160000, 170000, 180000, 190000, 200000, 250000, 300000, 350000, 400000]
 
 
 

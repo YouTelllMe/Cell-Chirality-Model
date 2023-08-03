@@ -7,6 +7,36 @@ from collections.abc import Sequence
 import pandas as pd
 import random 
 from fit import fit_model_whole
+from collections.abc import Sequence
+
+
+def resample_ci(CI: int = 0.95,
+                resampled: tuple[Sequence, Sequence] | None = None):
+    """
+    CI must be between 0 and 1 (if larger or smaller, casted to 0 and 1)
+    """
+    CI = min(CI, 1)
+    CI = max(CI, 0)
+
+    if resampled is None:
+        resample_df = pd.read_csv(config.RESAMPLE_DATAPATH)
+        A_n = resample_df["A"].to_numpy()
+        B_n = resample_df["B"].to_numpy()
+    else:
+        A_n, B_n = resampled
+        A_n = np.array(A_n)
+        B_n = np.array(B_n)
+
+    n_folds = len(A_n)
+    CI_side = int((1 - CI) / 2 * n_folds)
+    A_n_sorted = np.sort(A_n)
+    B_n_sorted = np.sort(A_n)
+
+    # indexing a bit tricky here
+    A_CI = [A_n_sorted[CI_side], A_n_sorted[-CI_side-1]]
+    B_CI = [B_n_sorted[CI_side], B_n_sorted[-CI_side-1]]
+
+    return(A_CI, B_CI)
 
 
 def resample_n(n_folds: int = 10):
@@ -27,6 +57,8 @@ def resample_n(n_folds: int = 10):
         A_n.append(resampled_A)
         B_n.append(resampled_B)
 
+    resample_df = pd.DataFrame(data={"A":A_n, "B":B_n})
+    resample_df.to_csv(config.RESAMPLE_DATAPATH)
     return(A_n, B_n)
 
 
@@ -111,5 +143,4 @@ def residuals(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
 
 
 if __name__ == "__main__":
-    res = residuals(utils.get_data(), 6.7, 0.04)
-    resample(utils.get_data(),res)
+    print(resample_ci(0.95, resample_n(100)))

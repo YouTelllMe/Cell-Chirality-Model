@@ -11,6 +11,7 @@ POSITION_1_DATAPATH = os.path.join(CUR_DIR, "model_output", "data_1.csv")
 POSITION_2_DATAPATH = os.path.join(CUR_DIR, "model_output", "data_2.csv")
 POSITION_3_DATAPATH = os.path.join(CUR_DIR, "model_output", "data_3.csv")
 POSITION_4_DATAPATH = os.path.join(CUR_DIR, "model_output", "data_4.csv")
+RESAMPLE_DATAPATH = os.path.join(CUR_DIR, "model_output", "resample_AB.csv")
 # raw data
 ANTERIOR_ANGLE_PATH = os.path.join(CUR_DIR, "raw_data", "anterior.xlsx")
 CORTICALFLOW_PATH = os.path.join(CUR_DIR, "raw_data", "corticalflow.xlsx")

@@ -8,7 +8,6 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from fit import fit 
 
-   
 
 
 def plot_all() -> None:
@@ -156,8 +155,6 @@ def plot_fit():
     axAD.legend()
     # save figure
     plt.savefig(config.PLOT_FIT)
-
-
 
 def plot_level_curves() -> None:
     """

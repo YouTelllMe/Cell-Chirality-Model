@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from euler_method import euler
 from models import model_AB
-import scipy.stats.t as t
+from scipy.stats import t
 
 
 def fit_modelAB(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,

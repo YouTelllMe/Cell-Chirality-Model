@@ -126,6 +126,13 @@ def plot_fit():
     dp_average = utils.column_average(dorsal_posterior)
     aa_averege = utils.column_average(anterior_anterior)
     ad_average = utils.column_average(anterior_dorsal)
+
+    # get standard error of the mean
+    da_std = utils.get_std(dorsal_anterior, axis=1) / np.sqrt(config.DATA_STEPS)
+    dp_std = utils.get_std(dorsal_posterior, axis=1) / np.sqrt(config.DATA_STEPS)
+    aa_std = utils.get_std(anterior_anterior, axis=1) / np.sqrt(config.DATA_STEPS)
+    ad_std = utils.get_std(anterior_dorsal, axis=1) / np.sqrt(config.DATA_STEPS)
+
     # load data
     computed_angle = pd.read_csv(config.ANGLES_DATAPATH)
     computed_data_index = range(0, config.MODEL_STEPS, config.STEP_SCALE)
@@ -133,6 +140,7 @@ def plot_fit():
     computed_dorsal_2 = computed_angle["dorsal2"][computed_data_index].to_numpy()
     computed_anterior_1 = computed_angle["anterior1"][computed_data_index].to_numpy()
     computed_anterior_2 = computed_angle["anterior2"][computed_data_index].to_numpy()
+
     # initialize graph, set Axes titles 
     fig, ((axDA, axDP),(axAA, axAD)) = plt.subplots(2, 2)
     fig.set_figheight(7)
@@ -150,6 +158,13 @@ def plot_fit():
     axAA.plot(anterior_t, aa_averege, label="average data", markersize=2)
     axAD.plot(anterior_t, computed_anterior_1, label="model", markersize=2)
     axAD.plot(anterior_t, ad_average, label="average data", markersize=2)
+
+    # plot confidence bands
+    axDA.fill_between(dorsal_t, da_average - da_std, da_average + da_std, alpha=0.2)
+    axDP.fill_between(dorsal_t, dp_average - dp_std, dp_average + dp_std, alpha=0.2)
+    axAA.fill_between(anterior_t, aa_averege - aa_std, aa_averege + aa_std, alpha=0.2)
+    axAD.fill_between(anterior_t, ad_average - ad_std, ad_average + ad_std, alpha=0.2)
+
     # plot legend
     axDA.legend()
     axDP.legend()
@@ -208,4 +223,4 @@ def plot_level_curves() -> None:
     plt.show()
 
 if __name__ == "__main__":
-    plot_level_curves()
+    plot_fit()

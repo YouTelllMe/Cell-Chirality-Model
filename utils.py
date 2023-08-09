@@ -41,3 +41,10 @@ def get_data():
 
     return(dorsal_anterior, dorsal_posterior, dorsal_t, 
            anterior_anterior, anterior_dorsal, anterior_t)
+
+def get_std(df: pd.DataFrame, axis: int = 0):
+    """
+    Return the standard deviation across the specified axis.
+    """
+    return df.std(axis=axis).to_numpy()
+

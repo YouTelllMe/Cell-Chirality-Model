@@ -182,20 +182,20 @@ def plot_fit():
 
     # plot data
     axD.plot(dorsal_t, computed_dorsal_2, label="dorsal anterior model", markersize=2, color="blue")
-    axD.plot(dorsal_t_passed, da_average_passed, "o", label="dorsal anterior data - passed", markersize=3, color="red")
-    axD.plot(dorsal_t_npassed, da_average_npassed, "o", label="dorsal anterior data", markersize=3, color='none', markeredgecolor="blue")
+    axD.plot(dorsal_t_passed, da_average_passed, "o", label="dorsal anterior data - passed", markersize=4, color="blue")
+    axD.plot(dorsal_t_npassed, da_average_npassed, "o", label="dorsal anterior data", markersize=4, color='none', markeredgecolor="blue")
 
     axD.plot(dorsal_t, computed_dorsal_1, label="dorsal posterior model", markersize=2, color="red")
-    axD.plot(dorsal_t_passed, dp_average_passed, "o", label="dorsal posterior data - passed", markersize=3, color="red")
-    axD.plot(dorsal_t_npassed, dp_average_npassed, "o", label="dorsal posterior data", markersize=3, color='none', markeredgecolor="red")
+    axD.plot(dorsal_t_passed, dp_average_passed, "o", label="dorsal posterior data - passed", markersize=4, color="red")
+    axD.plot(dorsal_t_npassed, dp_average_npassed, "o", label="dorsal posterior data", markersize=4, color='none', markeredgecolor="red")
 
     axA.plot(anterior_t, computed_anterior_2, label="anterior anterior model", markersize=2, color="blue")
-    axA.plot(anterior_t_passed, aa_average_passed, "o", label="anterior anterior data - passed", markersize=3, color="blue")
-    axA.plot(anterior_t_npassed, aa_average_npassed, "o", label="anterior anterior data", markersize=3, color='none', markeredgecolor="blue")
+    axA.plot(anterior_t_passed, aa_average_passed, "o", label="anterior anterior data - passed", markersize=4, color="blue")
+    axA.plot(anterior_t_npassed, aa_average_npassed, "o", label="anterior anterior data", markersize=4, color='none', markeredgecolor="blue")
 
     axA.plot(anterior_t, computed_anterior_1, label="anterior posterior model", markersize=2, color="red")
-    axA.plot(anterior_t_passed, ap_average_passed, "o", label="anterior posterior data - passed", markersize=3, color="red")
-    axA.plot(anterior_t_npassed, ap_average_npassed, "o", label="anterior posterior data", markersize=3, color='none', markeredgecolor="red")
+    axA.plot(anterior_t_passed, ap_average_passed, "o", label="anterior posterior data - passed", markersize=4, color="red")
+    axA.plot(anterior_t_npassed, ap_average_npassed, "o", label="anterior posterior data", markersize=4, color='none', markeredgecolor="red")
 
 
     # plot confidence bands

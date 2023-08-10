@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 import config
+import scipy
+from fitter import Fitter, get_common_distributions, get_distributions
+import matplotlib.pyplot as plt
+
 
 def process_rawdf(df: pd.DataFrame, time_name: str) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
@@ -48,3 +52,11 @@ def get_std(df: pd.DataFrame, axis: int = 0):
     """
     return df.std(axis=axis).to_numpy()
 
+
+def t_test(sample1: np.ndarray, sample2: np.ndarray):
+    """
+    Performs the t_test on two data samples for the null hypothesis that 2 independent samples
+    have identical average (expected) values. 
+    """
+    t_test_result = scipy.stats.ttest_ind(sample1, sample2)
+    return (t_test_result)

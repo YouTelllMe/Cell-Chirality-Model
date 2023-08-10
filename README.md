@@ -4,6 +4,17 @@ Python Implementation of Cell Chirality Spring Model in early embryonic developm
 
 Notes: https://www.overleaf.com/read/xqqjsrdqwkcj
 
+## TO-DO
+
+1. Angle data doesn't have to be computed DURING euler steps, can decouple that process
+2. Fix naming for Dorsal1, Dorsal Anterior...
+3. Make sure the friction vector directions are correct. Something suspicious about the EMS friction.
+
+## Note
+
+- Cell 1 = Abar, Cell 2 = Abpr, Cell 3 = Abal, Cell 4 = Abpl
+- positive z = top, positive x = posterior, positive y = right, right side spinning towards anterior?
+
 ## Labelled Visualizations
 
 ![XYZ dot](https://github.com/YouTelllMe/Cell-Chirality-Visualization/assets/80024712/c04e09c8-4c7a-4fc0-aea3-db9a91236e96)

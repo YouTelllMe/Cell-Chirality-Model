@@ -14,6 +14,8 @@ def model_AB(curr_pos, A, B, time, diag14: bool, diag23: bool):
     p2 = np.array([curr_pos[3], curr_pos[4], curr_pos[5]])
     p3 =  np.array([curr_pos[6], curr_pos[7], curr_pos[8]])
     p4 =  np.array([curr_pos[9], curr_pos[10], curr_pos[11]])
+    p2_cell = np.array([0.5+0.5*np.sqrt(3),0,0.5])
+
 
     p1z = curr_pos[2]
     p2z = curr_pos[5]
@@ -35,6 +37,9 @@ def model_AB(curr_pos, A, B, time, diag14: bool, diag23: bool):
     u42 = -1 * u24
     u43 = -1 * u34
 
+    u22_cell = np.subtract(p2_cell, p2)/np.linalg.norm(np.subtract(p2_cell, p2))
+    u42_cell = np.subtract(p2_cell, p4)/np.linalg.norm(np.subtract(p2_cell, p4))
+
 
     cortical_flow = np.multiply(0.000527*time, np.e**(-0.01466569*time))
 
@@ -50,11 +55,13 @@ def model_AB(curr_pos, A, B, time, diag14: bool, diag23: bool):
     # equation 2
     p2_prime = t_final * (B * ((np.linalg.norm(p2-p1) - 1) * u21 + 
                                 (np.linalg.norm(p2-p4) - 1) * u24 - 
-                                (p2z - 0.5) * k_hat) + 
+                                (p2z - 0.5) * k_hat + 
+                                (np.linalg.norm(p2-p2_cell) - 1) * u22_cell) + 
                           A * cortical_flow * 
                                 (np.cross(u12, u13) -
                                  np.cross(u21, u24) -
-                                 np.cross(u24, k_hat)))
+                                 np.cross(u24, k_hat) + 
+                                 np.cross(u24, u22_cell)))
 
     # equation 3
     p3_prime = t_final * (B * ((np.linalg.norm(p3-p1) - 1) * u31 + 
@@ -68,11 +75,13 @@ def model_AB(curr_pos, A, B, time, diag14: bool, diag23: bool):
     # equation 4
     p4_prime = t_final * (B * ((np.linalg.norm(p4-p2) - 1) * u42 +
                                 (np.linalg.norm(p4-p3) - 1) * u43 - 
-                                (p4z - 0.5) * k_hat) + 
+                                (p4z - 0.5) * k_hat + 
+                                (np.linalg.norm(p4-p2_cell) - 1) * u42_cell) + 
                           A * cortical_flow * 
                                 (np.cross(u34, u31) -
                                  np.cross(u43, u42) -
-                                 np.cross(u42, k_hat)))
+                                 np.cross(u42, k_hat) -
+                                 np.cross(u42, u42_cell)))
     
     if diag14:
         p1_prime += t_final * B * (np.linalg.norm(p1-p4) - 1) * u14

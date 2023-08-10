@@ -166,7 +166,7 @@ def fit_model_curve(x: Sequence[float], A: float, B: float):
     return computed_instance_N
 
 if __name__ == "__main__":
-    fit_model_curve([], 6.7, 0.04)
+    print(fit_model_whole(utils.get_data()))
 
 
 #=======================================================================================================================#

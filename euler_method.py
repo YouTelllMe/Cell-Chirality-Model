@@ -184,3 +184,8 @@ def save_euler(angle_df: pd.DataFrame, distance_df: pd.DataFrame, position_euler
     position_eulers[1].to_csv(config.POSITION_2_DATAPATH)
     position_eulers[2].to_csv(config.POSITION_3_DATAPATH)
     position_eulers[3].to_csv(config.POSITION_4_DATAPATH)
+
+
+
+if __name__ == "__main__":
+    run_euler(15.38832958,  0.08871743)

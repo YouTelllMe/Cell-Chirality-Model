@@ -6,7 +6,7 @@ import config
 from collections.abc import Sequence
 import pandas as pd
 import random 
-from fit import fit_model_whole, fit
+from Fit.FitModel import fit_model_whole, fit
 from collections.abc import Sequence
 
 
@@ -102,82 +102,3 @@ def resample(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
             anterior_t,
             )
     
-            
-def residuals(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
-                         pd.DataFrame, pd.DataFrame, pd.DataFrame], A: float, B: float):
-    """
-    """
-
-    (dorsal_anterior, 
-     dorsal_posterior, 
-     dorsal_t,
-     anterior_anterior, 
-     anterior_dorsal, 
-     anterior_t) = data
-
-    residuals = {"dorsal1": [], "dorsal2": [], "anterior1": [], "anterior2": []}
-    
-    # takes 400 steps (initial position vector inclusive)
-    N = config.MODEL_STEPS
-    tau = np.linspace(1/N, 1, N-1)
-    euler_data = euler(model_AB, 
-                        np.array([-0.5,0.5,0.5, 0.5,0.5,0.5, -0.5,-0.5,0.5, 0.5,-0.5,0.5]), 
-                        1/N, 
-                        tau, 
-                        A, 
-                        B, 
-                        False)
-        
-    computed_angle = euler_data[2]
-    computed_data_index = range(0, config.MODEL_STEPS, config.STEP_SCALE)
-    computed_dorsal_1 = computed_angle["dorsal1"][computed_data_index].to_numpy()
-    computed_dorsal_2 = computed_angle["dorsal2"][computed_data_index].to_numpy()
-    computed_anterior_1 = computed_angle["anterior1"][computed_data_index].to_numpy()
-    computed_anterior_2 = computed_angle["anterior2"][computed_data_index].to_numpy()
-
-    for column_index in range(config.DATA_N):
-        residuals["dorsal1"].extend(dorsal_posterior.iloc[:,column_index].to_numpy() - computed_dorsal_1)
-        residuals["dorsal2"].extend(dorsal_anterior.iloc[:,column_index].to_numpy() - computed_dorsal_2)
-        residuals["anterior1"].extend(anterior_anterior.iloc[:,column_index].to_numpy() - computed_anterior_2)
-        residuals["anterior2"].extend(anterior_dorsal.iloc[:,column_index].to_numpy() - computed_anterior_1)
-
-    return residuals
-
-
-def get_residual_squared() -> None:
-    """
-    """
-    N = 20
-    A_step = 0.1
-    B_step = 0.001
-    A = 6.7
-    B = 0.04
-    A_range = np.array(range(0, N + 1)) * A_step + np.ones(N + 1) * A
-    B_range = np.array(range(0, N + 1)) * B_step + np.ones(N + 1) * B
-    A_range_neg = np.array(range(1, N)) * -A_step + np.ones(N - 1) * A
-    B_range_neg = np.array(range(1, N)) * -B_step + np.ones(N - 1) * B
-
-    A_all = np.concatenate((A_range_neg, A_range))
-    B_all = np.concatenate((B_range_neg, B_range))  
-
-    (dorsal_anterior, 
-     dorsal_posterior, 
-     dorsal_t,
-     anterior_anterior, 
-     anterior_dorsal, 
-     anterior_t) = utils.get_data()
-
-    residual_squared = np.zeros((len(A_all), len(B_all)))
-    for a_index in range(len(A_all)): 
-        for b_index in range(len(B_all)):
-            score = fit((A_all[a_index], B_all[b_index]), 
-                        anterior_anterior, anterior_dorsal, dorsal_anterior, dorsal_posterior)
-            residual_squared[a_index][b_index] = score
-
-    residual_squared_df = pd.DataFrame(data=residual_squared)
-    residual_squared_df["A"] = A_all
-    residual_squared_df["B"] = B_all
-    residual_squared_df.to_csv(config.RESIDUAL_SQUARED_DATAPATH, index=False)
-
-if __name__ == "__main__":
-    get_residual_squared()

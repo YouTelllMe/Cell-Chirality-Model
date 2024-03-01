@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import config
 import scipy
-from fitter import Fitter, get_common_distributions, get_distributions
+# from fitter import Fitter, get_common_distributions, get_distributions
 import matplotlib.pyplot as plt
 
 
@@ -41,10 +41,10 @@ def get_data():
     dorsal = pd.read_excel(dorsal_xls, "dorsal")
     anterior = pd.read_excel(anterior_xls, "anterior")
     dorsal_anterior, dorsal_posterior, dorsal_t = process_rawdf(dorsal, "Time(s)")
-    anterior_anterior, anterior_dorsal, anterior_t = process_rawdf(anterior, "Time(s)")
+    anterior_anterior, anterior_posterior, anterior_t = process_rawdf(anterior, "Time(s)")
 
     return(dorsal_anterior, dorsal_posterior, dorsal_t, 
-           anterior_anterior, anterior_dorsal, anterior_t)
+           anterior_anterior, anterior_posterior, anterior_t)
 
 def get_std(df: pd.DataFrame, axis: int = 0):
     """
@@ -59,4 +59,4 @@ def t_test(sample1: np.ndarray, sample2: np.ndarray):
     have identical average (expected) values. 
     """
     t_test_result = scipy.stats.ttest_ind(sample1, sample2)
-    return (t_test_result)
+    return t_test_result

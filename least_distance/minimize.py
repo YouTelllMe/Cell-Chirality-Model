@@ -1,25 +1,26 @@
 from scipy.optimize import minimize
+from numpy.linalg import norm
+
+def distance(x, *args):
+    """
+    Function used in optimization operation. Returns the norm of a point and a fixed point (args[0]). 
+    """
+    return norm(x - args[0])
 
 
-a = 10
-b = 50
-c = 100
+def find_min(x, surface):
+    """
+    Minimizes L2 norm between a fixed point and a surface. x should be an ndarray and surface should be 
+    a lambda function that takes one ndarray as input and return 0 if the point is on the surface. 
 
-fun = lambda x: ((x[0] - x[3])**2 + (x[1] - x[4])**2 + (x[2] - x[5])**2)**(1/2)
-surface1 = lambda x: x[0]**2 + x[1]**2 + x[2]**2 -1
-# surface2 = lambda x: x[5]-10
-# surface2 = lambda x: x[3]**2/a**2 + x[4]**2/b**2 + x[5]**2/c**2 - 1
-surface2 = lambda x: x[3]**2/a**2 + x[4]**2/b**2 + x[5]**2/c**2 - 1
+    returns a scipy.optimize.OptimizeResult object. 
 
-x0 = (0,0,0,0,0,0)
-
-cons = ({'type': 'eq', 'fun': surface1},
-        {'type': 'eq', 'fun': surface2})
-
-res = minimize(fun, x0, constraints = cons, method = 'Newton-CG')
-
-print(res)
-
-
-
+    EXAMPLE USAGE:
+        x0 = (0,0,0)
+        surface = lambda x: x[0]**2 + x[1]**2 + x[2]**2 - 1 (sphere of radius 1)
+        res = find_min(x0, surface)
+        print(res.x)
+    """
+    cons = {'type': 'eq', 'fun': surface}
+    return minimize(distance, x, args=(x), constraints=cons)
 

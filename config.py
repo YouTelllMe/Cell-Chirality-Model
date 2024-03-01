@@ -1,16 +1,14 @@
 import os 
 
+#TODO (separate configs per module)
 #===========================================================================#
 "PATHS"
 # curr dir
 CUR_DIR = os.getcwd()
 # model data
 DISTANCE_DATAPATH = os.path.join(CUR_DIR,"model_output", "distance.csv")
-ANGLES_DATAPATH = os.path.join(CUR_DIR,"model_output", "fit_angle.csv")
-POSITION_1_DATAPATH = os.path.join(CUR_DIR, "model_output", "data_1.csv")
-POSITION_2_DATAPATH = os.path.join(CUR_DIR, "model_output", "data_2.csv")
-POSITION_3_DATAPATH = os.path.join(CUR_DIR, "model_output", "data_3.csv")
-POSITION_4_DATAPATH = os.path.join(CUR_DIR, "model_output", "data_4.csv")
+ANGLES_DATAPATH = os.path.join(CUR_DIR,"model_output", "angle.csv")
+POSITION_DATAPATH = os.path.join(CUR_DIR, "model_output", "position.csv")
 RESAMPLE_DATAPATH = os.path.join(CUR_DIR, "model_output", "resample_AB.csv")
 RESIDUAL_SQUARED_DATAPATH = os.path.join(CUR_DIR, "model_output", "residual_squared.csv")
 # raw data
@@ -33,7 +31,9 @@ DATA_STEPS = 40
 DATA_N = 10
 STEP_SCALE = 10
 MODEL_STEPS = DATA_STEPS * STEP_SCALE
-GUESS = (6.309078133216052, 0.037810656687541716) #6.739499413217986 0.040047325767577635
+h = 1/MODEL_STEPS
+GUESS = (1, 1, 1) #6.739499413217986 0.040047325767577635
+WALL = (1,1,1,3,0.5)
 #===========================================================================#
 "OTHER"
 COLORS = ["blue", "orange", "green", "red"] # colors for cells

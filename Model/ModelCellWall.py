@@ -26,8 +26,11 @@ class ModelCellWall():
      def update_cell(self, cell: Cell) -> Cell:
           position = cell.get_position()
           min_point = find_min(position, self.surface)
-          if np.linalg.norm(min_point.x-position) < 0.5:  
-               position = self.push_factor * (min_point.x-position)
+          norm = np.linalg.norm(min_point.x-position)
+          if norm < 0.5:  
+               oldposition = position
+               position = position + self.push_factor * (0.5 - norm) * (min_point.x-position)/norm
+               print(oldposition, "->", position)
           return Cell(position)
 
 

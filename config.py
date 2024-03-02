@@ -28,12 +28,13 @@ PLOT_LEVEL_CURVE = os.path.join(CUR_DIR, "model_plot", "level_curve.png")
 "EULER + FIT"
 T_FINAL = 195 # final timestamp of raw data
 DATA_STEPS = 40
-DATA_N = 10
-STEP_SCALE = 10
-MODEL_STEPS = DATA_STEPS * STEP_SCALE
-h = 1/MODEL_STEPS
-GUESS = (1, 1, 1) #6.739499413217986 0.040047325767577635
-WALL = (1,1,1,3,0.5)
+DATA_N = 10 
+STEP_SCALE = 10 
+MODEL_STEPS = DATA_STEPS * STEP_SCALE # how many ODE steps per data step
+h = 1/MODEL_STEPS # total time = 1 unit over number of step size
+GUESSABC = (1, 1, 1) #[9.52396779, 0.0642205, 5.767196]
+GUESSAB = (1, 1) #[6.83606077, 0.03953272]
+WALL = (0)
 #===========================================================================#
 "OTHER"
 COLORS = ["blue", "orange", "green", "red"] # colors for cells

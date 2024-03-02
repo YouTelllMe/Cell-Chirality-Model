@@ -13,7 +13,7 @@ class ModelABC(Model):
     def step(self, time):
         super().step(time)
         t_final = config.T_FINAL
-            # position vectors
+        # position vectors
         p1 = self.system.p1.get_position()
         p2 = self.system.p2.get_position()
         p3 = self.system.p3.get_position()
@@ -50,7 +50,7 @@ class ModelABC(Model):
 
         # equation 1
         p1_prime = t_final * (self.B * ((np.linalg.norm(p1-p2) - 1) * u12 + 
-                                        (np.linalg.norm(p2-p4) - 1) * u13 - 
+                                        (np.linalg.norm(p1-p3) - 1) * u13 - 
                                         (p1z - 0.5) * k_hat) + 
                                 self.A * cortical_flow_r * 
                                         (np.cross(u21, u24) - 

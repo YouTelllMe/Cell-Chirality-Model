@@ -49,7 +49,7 @@ class Euler:
 
         if save:
             self.save_Dataframe()
-            # self.animate()
+            self.animate()
 
         return (self.euler_df, self.distance_df, self.angle_df)
 
@@ -58,9 +58,9 @@ class Euler:
         Saves the distance, angle, and position data from euler's method. 
         """
         try:
-            self.euler_df.to_csv(config.POSITION_DATAPATH)
-            self.distance_df.to_csv(config.DISTANCE_DATAPATH)
-            self.angle_df.to_csv(config.ANGLES_DATAPATH)
+            self.euler_df.to_csv(config.POSITION_DATAPATH, index=False)
+            self.distance_df.to_csv(config.DISTANCE_DATAPATH, index=False)
+            self.angle_df.to_csv(config.ANGLES_DATAPATH, index=False)
         except:
             print("Dataframe doesn't exist")
         
@@ -73,7 +73,7 @@ class Euler:
 class EulerAnimator:
 
     def __init__(self, euler_instance: Euler) -> None:
-        self.euler = euler_instance
+        self.data = EulerAnimator.process_df(euler_instance.euler_df)
 
     def animate(self):
         """
@@ -92,14 +92,14 @@ class EulerAnimator:
         # initialize 4 position vectors 
         positions_vectors = []
         animated_indicies = range(0, config.MODEL_STEPS, config.STEP_SCALE)
-        for position_index in range(len(self.euler)):
+        for position_index in range(len(self.data)):
             color = config.COLORS[position_index]
             new_position, = AX.plot([],[],[],".", alpha=0.4, markersize=3, label=position_index+1, c=color)
             positions_vectors.append(new_position)
 
             # select ones to animate
-            self.euler[position_index] = self.euler[position_index].iloc[animated_indicies].reset_index(drop=True)
-        steps = len(self.euler[0].index)
+            self.data[position_index] = self.data[position_index].iloc[animated_indicies].reset_index(drop=True)
+        steps = len(self.data[0].index)
         AX.legend()
 
         # initialize axes of rotation
@@ -126,7 +126,7 @@ class EulerAnimator:
         anim = FuncAnimation(FIG, 
                             self.update_replace, 
                             steps, 
-                            fargs=(self.euler,
+                            fargs=(self.data,
                                 SIZE,
                                 positions_vectors, 
                                 rotation_axes, 
@@ -186,7 +186,7 @@ class EulerAnimator:
         rotation_axes[1].set_3d_properties([data[1]["z"][frame], data[3]["z"][frame]])
 
 
-    def generate_ball(position: tuple[float, float, float], radius: float):
+    def generate_ball(self, position: tuple[float, float, float], radius: float):
         """
         Return evenly spaced coordinates on the sphere with center at position with radius radius.
         """
@@ -216,3 +216,21 @@ class EulerAnimator:
                 z.append(center_z+curr_z)
         
         return {"x": x, "y": y, "z": z}
+    
+
+    @staticmethod
+    def process_df(position_df: pd.DataFrame):
+        if position_df is None:
+            raise Exception("No data found in Euler instance.")
+        
+        cols = position_df.columns
+        col_len = len(cols)
+        if col_len % 3 != 0: 
+            raise Exception("Euler instance has invalid dimensions.")
+        
+        df_list = []
+        for index in range(col_len // 3):
+            obj_df = position_df[[cols[3*index], cols[3*index+1], cols[3*index+2]]]
+            obj_df = obj_df.set_axis(['x', 'y', 'z'], axis=1)
+            df_list.append(obj_df)
+        return df_list

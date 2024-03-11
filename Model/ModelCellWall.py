@@ -3,35 +3,124 @@ from Model.ModelABC import ModelABC
 from Model.Model import Model
 from Least_Distance.minimize import find_min
 import numpy as np
+import config
 
-class ModelCellWall():
-     def __init__(self, model: Model, surface, push_factor) -> None:
-          self.model = model
-          self.system = model.system
-          self.surface = surface
-          self.push_factor = push_factor
-    
+
+class ModelCellWall(Model):
+
+     def __init__(self, A, B, C, system, surface) -> None:
+          super().__init__(A, B, system)
+          self.C = C
+          self.surface = surface 
+
      def step(self, time):
-          curr_model = self.model.step(time)  
-          curr_model.system.p1 = self.update_cell(curr_model.system.p1)
-          curr_model.system.p2 = self.update_cell(curr_model.system.p2)
-          curr_model.system.p3 = self.update_cell(curr_model.system.p3)
-          curr_model.system.p4 = self.update_cell(curr_model.system.p4)
+          super().step(time)
+          t_final = config.T_FINAL
+          # position vectors
+          p1 = self.system.p1.get_position()
+          p2 = self.system.p2.get_position()
+          p3 = self.system.p3.get_position()
+          p4 = self.system.p4.get_position()
+          p2_cell = np.array([0.5+np.cos(self.C)*0.5*np.sqrt(3),0,0.5-np.sin(self.C)*0.5*np.sqrt(3)])
+
+          p1z = p1[2]
+          p2z = p2[2]
+          p3z = p3[2]
+          p4z = p4[2]
+          k_hat = np.array([0,0,1])
+
+          # unit vectors 
+          u12 = np.subtract(p2, p1)/np.linalg.norm(np.subtract(p2, p1))
+          u13 = np.subtract(p3, p1)/np.linalg.norm(np.subtract(p3, p1))
+          u14 = np.subtract(p4, p1)/np.linalg.norm(np.subtract(p4, p1))
+          u21 = -1 * u12
+          u23 = np.subtract(p3, p2)/np.linalg.norm(np.subtract(p3, p2))
+          u24 = np.subtract(p4, p2)/np.linalg.norm(np.subtract(p4, p2))
+          u31 = -1 * u13 
+          u32 = -1 * u23
+          u34 = np.subtract(p4, p3)/np.linalg.norm(np.subtract(p4, p3))
+          u41 = -1 * u14
+          u42 = -1 * u24
+          u43 = -1 * u34
+
+          u22_cell = np.subtract(p2_cell, p2)/np.linalg.norm(np.subtract(p2_cell, p2))
+          u42_cell = np.subtract(p2_cell, p4)/np.linalg.norm(np.subtract(p2_cell, p4))
+
+
+          # cortical_flow = np.multiply(0.000527*time, np.e**(-0.01466569*time))
+          cortical_flow_r = np.multiply(0.000345*time, np.e**(-0.012732*time))
+          cortical_flow_l = np.multiply(0.00071*time, np.e**(-0.0166*time))
+
+          # equation 1
+          p1_prime = t_final * (self.B * ((np.linalg.norm(p1-p2) - 1) * u12 + 
+                                        (np.linalg.norm(p1-p3) - 1) * u13 - 
+                                        (p1z - 0.5) * k_hat) + 
+                                   self.A * cortical_flow_r * 
+                                        (np.cross(u21, u24) - 
+                                        np.cross(u12, u13) -
+                                        np.cross(u13, k_hat)))
+          # equation 2
+          p2_prime = t_final * (self.B * ((np.linalg.norm(p2-p1) - 1) * u21 + 
+                                        (np.linalg.norm(p2-p4) - 1) * u24 - 
+                                        (p2z - 0.5) * k_hat + 
+                                        (np.linalg.norm(p2-p2_cell) - 1) * u22_cell) + 
+                                   self.A * cortical_flow_r * 
+                                        (np.cross(u12, u13) -
+                                        np.cross(u21, u24) -
+                                        np.cross(u24, k_hat) + 
+                                        np.cross(u24, u22_cell)))
+
+          # equation 3
+          p3_prime = t_final * (self.B * ((np.linalg.norm(p3-p1) - 1) * u31 + 
+                                        (np.linalg.norm(p3-p4) - 1) * u34 - 
+                                        (p3z - 0.5) * k_hat) + 
+                                   self.A * cortical_flow_l * 
+                                        (np.cross(u43, u42) -
+                                        np.cross(u34, u31) -
+                                        np.cross(u31, k_hat)))
+
+          # equation 4
+          p4_prime = t_final * (self.B * ((np.linalg.norm(p4-p2) - 1) * u42 +
+                                        (np.linalg.norm(p4-p3) - 1) * u43 - 
+                                        (p4z - 0.5) * k_hat + 
+                                        (np.linalg.norm(p4-p2_cell) - 1) * u42_cell) + 
+                                   self.A * cortical_flow_l * 
+                                        (np.cross(u34, u31) -
+                                        np.cross(u43, u42) -
+                                        np.cross(u42, k_hat) -
+                                        np.cross(u42, u42_cell)))
+
+          # applies spring force across cells in next iteration
+          if self.system.info.dist_14 <= 1:
+                    p1_prime += t_final * self.B * (np.linalg.norm(p1-p4) - 1) * u14
+                    p4_prime += t_final * self.B * (np.linalg.norm(p4-p1) - 1) * u41
+
+          if self.system.info.dist_23 <= 1:
+                    p2_prime += t_final * self.B * (np.linalg.norm(p2-p3) - 1) * u23
+                    p3_prime += t_final * self.B * (np.linalg.norm(p3-p2) - 1) * u32
+
+          p1_prime = self.cell_wall_step(p1, p1_prime, t_final)
+          p2_prime = self.cell_wall_step(p2, p2_prime, t_final)
+          p3_prime = self.cell_wall_step(p3, p3_prime, t_final)
+          p4_prime = self.cell_wall_step(p4, p4_prime, t_final)
+
 
           return ModelCellWall(
-                    curr_model,
-                    self.surface, 
-                    self.push_factor)
+               self.A,
+               self.B,
+               self.C,
+               FourCellSystem(Cell(p1 + config.h * p1_prime),
+                              Cell(p2 + config.h * p2_prime),
+                              Cell(p3 + config.h * p3_prime),
+                              Cell(p4 + config.h * p4_prime)),
+               self.surface)
 
-     def update_cell(self, cell: Cell) -> Cell:
-          position = cell.get_position()
-          min_point = find_min(position, self.surface)
-          norm = np.linalg.norm(min_point.x-position)
+     def cell_wall_step(self, pos, velocity, t_final):
+          min_point = find_min(pos, self.surface)
+          norm = np.linalg.norm(min_point.x-pos)
           if norm < 0.5:  
-               oldposition = position
-               position = position + self.push_factor * (0.5 - norm) * (min_point.x-position)/norm
-               print(oldposition, "->", position)
-          return Cell(position)
+               velocity += t_final * self.B * (0.5 - norm) * (min_point.x-pos)/norm
+          return velocity
 
 
 

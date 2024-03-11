@@ -13,9 +13,9 @@ def plot_all() -> None:
     """
 
     # read distance data
-    distances = pd.read_csv(config.DISTANCE_DATAPATH)
+    distances = pd.read_csv(config.DISTANCE_DATAPATH, index_col=0)
     # read angles data
-    angles = pd.read_csv(config.ANGLES_DATAPATH)
+    angles = pd.read_csv(config.ANGLES_DATAPATH, index_col=0)
     anterior_xls = pd.ExcelFile(config.ANTERIOR_ANGLE_PATH)
     dorsal_xls = pd.ExcelFile(config.DORSAL_ANGLE_PATH)
     anterior = pd.read_excel(anterior_xls, "anterior")
@@ -33,7 +33,7 @@ def plot_all() -> None:
     # run plotting helper functions; saves figure
     plot_distance(axDist, distances)
     plot_angles(axDegree, angles, anterior, dorsal)
-    # plot_xz(axX, axZ)
+    plot_xz(axX, axZ)
     plt.savefig(config.PLOT_xzplot)
 
     plot_fit()

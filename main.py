@@ -30,7 +30,7 @@ modelAB = ModelAB(6.74025692, 0.03932766,
 
 # modelWall = ModelCellWall(modelAB, surface, 0.1)
 
-Euler(modelAB).run(True)
+# Euler(modelAB).run(True)
 plot_all()
 
 # x0 = (0,0,0)

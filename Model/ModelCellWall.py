@@ -99,10 +99,10 @@ class ModelCellWall(Model):
                     p2_prime += t_final * self.B * (np.linalg.norm(p2-p3) - 1) * u23
                     p3_prime += t_final * self.B * (np.linalg.norm(p3-p2) - 1) * u32
 
-          p1_prime = self.cell_wall_step(p1, p1_prime, t_final)
-          p2_prime = self.cell_wall_step(p2, p2_prime, t_final)
-          p3_prime = self.cell_wall_step(p3, p3_prime, t_final)
-          p4_prime = self.cell_wall_step(p4, p4_prime, t_final)
+          p1_prime += self.cell_wall_step(p1, t_final)
+          p2_prime += self.cell_wall_step(p2, t_final)
+          p3_prime += self.cell_wall_step(p3, t_final)
+          p4_prime += self.cell_wall_step(p4, t_final)
 
 
           return ModelCellWall(
@@ -115,12 +115,12 @@ class ModelCellWall(Model):
                               Cell(p4 + config.h * p4_prime)),
                self.surface)
 
-     def cell_wall_step(self, pos, velocity, t_final):
+     def cell_wall_step(self, pos, t_final):
           min_point = find_min(pos, self.surface)
           norm = np.linalg.norm(min_point.x-pos)
           if norm < 0.5:  
-               velocity += t_final * self.B * (0.5 - norm) * (min_point.x-pos)/norm
-          return velocity
+               return np.array(t_final * self.B * (0.5 - norm) * (min_point.x-pos)/norm)
+          return np.zeros(len(pos))
 
 
 

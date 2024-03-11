@@ -30,7 +30,7 @@ def fit_model_whole():
     y_data = np.concatenate((dorsal_anterior, dorsal_posterior, anterior_anterior, anterior_dorsal, manual_distances))
     x_data = ()
 
-    popt, pcov = curve_fit(fit_model_curve, x_data, y_data, p0=config.WALL)
+    popt, pcov = curve_fit(fit_model_curve, x_data, y_data, p0=config.GUESSABC)
 
     alpha = 0.05 # 95% confidence interval = 100*(1-alpha)
     n = len(y_data)    # number of data points
@@ -42,19 +42,16 @@ def fit_model_whole():
                          (np.diag(pcov)[1]**0.5)*tval))
 
 
-def fit_model_curve(x: Sequence[float], A: float, B: float, C: float, surface_factor, push_factor):
+def fit_model_curve(x: Sequence[float], A: float, B: float, C: float):
     """
     """
-    surface = lambda x: x[0]**2 + (x[1]**2)/surface_factor + x[2]**2 - 1
-    euler_data = Euler(ModelCellWall(A, B, C, 
-                                     surface,
-                                     push_factor, 
+    euler_data = Euler(ModelCellWall(A, B, C,
                                      FourCellSystem(
                                         Cell((-0.5,0.5,0.5)), 
                                         Cell((0.5,0.5,0.5)), 
                                         Cell((-0.5,-0.5,0.5)), 
-                                        Cell((0.5,-0.5,0.5))
-                                    ))).run(False)
+                                        Cell((0.5,-0.5,0.5)),)
+                                    , config.SURFACE)).run(False)
     
         
     indicies = range(0, config.MODEL_STEPS, config.STEP_SCALE)

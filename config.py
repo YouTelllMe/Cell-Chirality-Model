@@ -34,7 +34,8 @@ MODEL_STEPS = DATA_STEPS * STEP_SCALE # how many ODE steps per data step
 h = 1/MODEL_STEPS # total time = 1 unit over number of step size
 GUESSABC = (1, 1, 1) #[9.52396779, 0.0642205, 5.767196]
 GUESSAB = (1, 1) #[6.83606077, 0.03953272]
-WALL = (0)
+
+SURFACE = lambda x: x[0]**2 + x[1]**2 + x[2]**2 - 2
 #===========================================================================#
 "OTHER"
 COLORS = ["blue", "orange", "green", "red"] # colors for cells

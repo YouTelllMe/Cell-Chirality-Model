@@ -25,7 +25,7 @@ class FourCellSystemDim:
 
 
 class FourCellSystem:
-
+    
     def __init__(self, p1: Cell, p2: Cell, p3: Cell, p4: Cell) -> None:
         self.p1 = p1
         self.p2 = p2

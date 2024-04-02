@@ -6,5 +6,5 @@ class Model:
         self.B = B
         self.system = system
 
-    def step(self, time) -> None:
+    def get_velocity(self, time) -> None:
         return

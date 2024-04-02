@@ -13,63 +13,67 @@ import config
 
 class FourCell:
 
-    def __init__(self, cur_pos, spring_constant, a) -> None:
-        self.a = a
+    def __init__(self, cur_pos, spring_constant, a, c) -> None:
+        self.a = a # controls growing springs (it's growth rate as a factor of integrate of cortical flow)
+        self.c = c # strength of friction / coritcal flow
         self.k = spring_constant
         self.cur_pos = np.array(cur_pos)
         self.euler = [cur_pos]
 
-
-        self.STEPS = 2000
+        self.STEPS = 1000
         self.H = 1/500 # 1/500; why do we do h = 1/ steps again? 
         # self.FORCE_T = lambda t: 10*t*np.e**-(5*t)
         # self.FORCE_T = lambda t: 0.5
-        self.SURFACES = [lambda x: x[1] - 1, lambda x: x[1] + 1]
-        
+        # self.SURFACES = [lambda x: x[1] - 1, lambda x: x[1] + 1]
+        self.SURFACES = [lambda x: x[0]**2 + x[1]**2 + x[2]**2 - np.sqrt(2)]
 
+        
     def get_velocity(self, t):
-        cell1 = np.array([self.cur_pos[0], self.cur_pos[1], self.cur_pos[2]])
-        cell2 = np.array([self.cur_pos[3], self.cur_pos[4], self.cur_pos[5]])
-        cell3 = np.array([self.cur_pos[6], self.cur_pos[7], self.cur_pos[8]])
-        cell4 = np.array([self.cur_pos[9], self.cur_pos[10], self.cur_pos[11]])
+        ABal = np.array([self.cur_pos[0], self.cur_pos[1], self.cur_pos[2]])
+        ABar = np.array([self.cur_pos[3], self.cur_pos[4], self.cur_pos[5]])
+        ABpr = np.array([self.cur_pos[6], self.cur_pos[7], self.cur_pos[8]])
+        ABpl = np.array([self.cur_pos[9], self.cur_pos[10], self.cur_pos[11]])
         
-        distance12 = np.linalg.norm(cell1-cell2)
-        distance13 = np.linalg.norm(cell1-cell3)
-        distance14 = np.linalg.norm(cell1-cell4)
-        distance23 = np.linalg.norm(cell2-cell3)
-        distance24 = np.linalg.norm(cell2-cell4)
-        distance34 = np.linalg.norm(cell3-cell4)
+        distance12 = np.linalg.norm(ABal-ABar)
+        distance13 = np.linalg.norm(ABal-ABpr)
+        distance14 = np.linalg.norm(ABal-ABpl)
+        distance23 = np.linalg.norm(ABar-ABpr)
+        distance24 = np.linalg.norm(ABar-ABpl)
+        distance34 = np.linalg.norm(ABpr-ABpl)
 
-        u12 = (cell1-cell2) / distance12 # unit vector from 2 to 1 
-        u13 = (cell1-cell3) / distance13 # unit vector from 3 to 1
-        u14 = (cell1-cell4) / distance14 # unit vector from 4 to 1
-        u23 = (cell2-cell3) / distance23 # unit vector from 3 to 2
-        u24 = (cell2-cell4) / distance24 # unit vector from 4 to 2
-        u34 = (cell3-cell4) / distance34 # unit vector from 4 to 3
+        u12 = (ABal-ABar) / distance12 # unit vector from 2 to 1 
+        u13 = (ABal-ABpr) / distance13 # unit vector from 3 to 1
+        u14 = (ABal-ABpl) / distance14 # unit vector from 4 to 1
+        u23 = (ABar-ABpr) / distance23 # unit vector from 3 to 2
+        u24 = (ABar-ABpl) / distance24 # unit vector from 4 to 2
+        u34 = (ABpr-ABpl) / distance34 # unit vector from 4 to 3
 
         
+        cortical_flow_r = 0.000345*t*np.e**(-0.012732*t)
+        cortical_flow_l = 0.00071*t*np.e**(-0.0166*t)
+
         # 0.6449 is the avg lambda of left right cortical flow 
-        cell1_prime = self.k * (-u12 * (distance12 - (1 + self.a *(0.6449**2 - (0.6449*t + 0.6449**2)*np.e**(-t/0.6449)))) 
-                              - u14 * (distance14 - 1))
+        ABal_prime = self.k * (-u12 * (distance12 - (1 + self.a *(0.6449**2 - (0.6449*t + 0.6449**2)*np.e**(-t/0.6449)))) 
+                              - u14 * (distance14 - 1)) + self.c * cortical_flow_l * (np.cross(-u14, -u12) - np.cross(u14, u34))
 
-        cell2_prime = self.k * (u12 * (distance12 - (1 + self.a *(0.6449**2 - (0.6449*t + 0.6449**2)*np.e**(-t/0.6449)))) 
-                              - u23 * (distance23 - 1))
+        ABar_prime = self.k * (u12 * (distance12 - (1 + self.a *(0.6449**2 - (0.6449*t + 0.6449**2)*np.e**(-t/0.6449)))) 
+                              - u23 * (distance23 - 1)) + self.c * cortical_flow_r * (np.cross(-u23, u12) - np.cross(u23, -u34))
 
-        cell3_prime = self.k * (- u34 * (distance34 - (1 + self.a *(0.6449**2 - (0.6449*t + 0.6449**2)*np.e**(-t/0.6449)))) 
-                                      + u23 * (distance23 - 1))
+        ABpr_prime = self.k * (- u34 * (distance34 - (1 + self.a *(0.6449**2 - (0.6449*t + 0.6449**2)*np.e**(-t/0.6449)))) 
+                                      + u23 * (distance23 - 1)) + self.c * cortical_flow_r * (np.cross(u23, -u34) - np.cross(-u23, u12))
 
-        cell4_prime = self.k * (u34 * (distance34 - (1 + self.a *(0.6449**2 - (0.6449*t + 0.6449**2)*np.e**(-t/0.6449)))) 
-                              + u14 * (distance14 - 1))
+        ABpl_prime = self.k * (u34 * (distance34 - (1 + self.a *(0.6449**2 - (0.6449*t + 0.6449**2)*np.e**(-t/0.6449)))) 
+                              + u14 * (distance14 - 1)) + self.c * cortical_flow_l * (np.cross(u14, u34) - np.cross(-u14, -u12))
 
 
         # cell wall forces 
         for surface in self.SURFACES:
-            cell1_prime += self.cell_wall_step(cell1, surface)
-            cell2_prime += self.cell_wall_step(cell2, surface)
-            cell3_prime += self.cell_wall_step(cell3, surface)
-            cell4_prime += self.cell_wall_step(cell4, surface)
+            ABal_prime += self.cell_wall_step(ABal, surface)
+            ABar_prime += self.cell_wall_step(ABar, surface)
+            ABpr_prime += self.cell_wall_step(ABpr, surface)
+            ABpl_prime += self.cell_wall_step(ABpl, surface)
 
-        return np.concatenate((cell1_prime, cell2_prime, cell3_prime, cell4_prime))
+        return np.concatenate((ABal_prime, ABar_prime, ABpr_prime, ABpl_prime))
     
     def step(self, t):
         self.cur_pos = self.cur_pos + self.get_velocity(t) * self.H
@@ -88,6 +92,9 @@ class FourCell:
         norm = np.linalg.norm(min_point.x-pos)
         if norm < 0.5:  
             return np.array(self.k * (0.5 - norm) * (pos-min_point.x)/norm)
+
+            # Van der Waals
+            # return np.array(self.k * ((0.5/(0.5-norm))**12 - (0.5/(0.5-norm))**6) * (pos-min_point.x)/norm)
         return np.zeros(len(pos))
     
     def animate(self):
@@ -102,15 +109,16 @@ class FourCell:
 
 
         cell_dfs = EulerAnimator.process_df(self.df)
-        cell_dfs[0].to_csv(os.path.join(os.getcwd(), "cell1.csv"))
-        cell_dfs[1].to_csv(os.path.join(os.getcwd(), "cell2.csv"))
-        cell_dfs[2].to_csv(os.path.join(os.getcwd(), "cell3.csv"))
-        cell_dfs[3].to_csv(os.path.join(os.getcwd(), "cell4.csv"))
+        cell_dfs[0].to_csv(os.path.join(os.getcwd(), "ABal.csv"))
+        cell_dfs[1].to_csv(os.path.join(os.getcwd(), "ABar.csv"))
+        cell_dfs[2].to_csv(os.path.join(os.getcwd(), "ABpr.csv"))
+        cell_dfs[3].to_csv(os.path.join(os.getcwd(), "ABpl.csv"))
         
         positions_vectors = []
         animated_indicies = range(0, self.STEPS-1, 20)
+        labels = ["ABal","ABar","ABpr","ABpl"]
         for position_index in range(len(cell_dfs)):
-            new_position, = AX.plot([],[],[],".", alpha=0.4, markersize=3, label=position_index+1)
+            new_position, = AX.plot([],[],[],".", alpha=0.4, markersize=3, label=labels[position_index])
             positions_vectors.append(new_position)
             cell_dfs[position_index] = cell_dfs[position_index].iloc[animated_indicies].reset_index(drop=True)
 
@@ -130,6 +138,8 @@ class FourCell:
                             repeat=True,
                             )
         
+        # plt.show()
+
         # save animation from different angles
         anim.save(os.path.join(os.getcwd(), "4-cell", "4cell-1.png"))
         AX.view_init(90, -90, 0)
@@ -192,6 +202,6 @@ class FourCell:
 
 
 if __name__ == "__main__":
-    instance = FourCell([0.45, 0.5, 0, 0.55, -0.5, 0, 
-                         -0.5, -0.5, 0, -0.5, 0.5, 0], 1, 2)
+    instance = FourCell([0.5, 0.5, 0, 0.5, -0.5, 0, 
+                         -0.5, -0.5, 0, -0.5, 0.5, 0], 6, 2, 100)
     instance.run()

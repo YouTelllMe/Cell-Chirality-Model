@@ -8,7 +8,5 @@ model_plot_prev/
 old/
 2-cell/
 4-cell/
-cell1.csv
-cell2.csv
-cell3.csv
-cell4.csv
+*.csv
+*.png

@@ -20,15 +20,16 @@ class FourCell:
         self.cur_pos = np.array(cur_pos)
         self.euler = [cur_pos]
 
-        self.STEPS = 1000
-        self.H = 1/500 # 1/500; why do we do h = 1/ steps again? 
+        self.STEPS = 2000
+        self.H = 1/8 # 1/500; why do we do h = 1/ steps again? 
         # self.FORCE_T = lambda t: 10*t*np.e**-(5*t)
         # self.FORCE_T = lambda t: 0.5
         # self.SURFACES = [lambda x: x[1] - 1, lambda x: x[1] + 1]
-        self.SURFACES = [lambda x: x[0]**2 + x[1]**2 + x[2]**2 - np.sqrt(2)]
+        self.SURFACES = [lambda x: (2*x[0]/3)**2 + x[1]**2 + x[2]**2 - 1]
 
         
     def get_velocity(self, t):
+        print(self.cur_pos)
         ABal = np.array([self.cur_pos[0], self.cur_pos[1], self.cur_pos[2]])
         ABar = np.array([self.cur_pos[3], self.cur_pos[4], self.cur_pos[5]])
         ABpr = np.array([self.cur_pos[6], self.cur_pos[7], self.cur_pos[8]])
@@ -51,20 +52,20 @@ class FourCell:
         
         cortical_flow_r = 0.000345*t*np.e**(-0.012732*t)
         cortical_flow_l = 0.00071*t*np.e**(-0.0166*t)
+        cortical_integral = ((1-(0.014666*t+1)*np.e**(-0.014666*t))/0.014666**2)
 
-        # 0.6449 is the avg lambda of left right cortical flow 
-        ABal_prime = self.k * (-u12 * (distance12 - (1 + self.a *(0.6449**2 - (0.6449*t + 0.6449**2)*np.e**(-t/0.6449)))) 
+        # 0.014666 is the avg lambda of left right cortical flow 
+        ABal_prime = self.k * (-u12 * (distance12 - (1 + self.a * cortical_integral)) 
                               - u14 * (distance14 - 1)) + self.c * cortical_flow_l * (np.cross(-u14, -u12) - np.cross(u14, u34))
 
-        ABar_prime = self.k * (u12 * (distance12 - (1 + self.a *(0.6449**2 - (0.6449*t + 0.6449**2)*np.e**(-t/0.6449)))) 
+        ABar_prime = self.k * (u12 * (distance12 - (1 + self.a * cortical_integral)) 
                               - u23 * (distance23 - 1)) + self.c * cortical_flow_r * (np.cross(-u23, u12) - np.cross(u23, -u34))
 
-        ABpr_prime = self.k * (- u34 * (distance34 - (1 + self.a *(0.6449**2 - (0.6449*t + 0.6449**2)*np.e**(-t/0.6449)))) 
+        ABpr_prime = self.k * (- u34 * (distance34 - (1 + self.a * cortical_integral)) 
                                       + u23 * (distance23 - 1)) + self.c * cortical_flow_r * (np.cross(u23, -u34) - np.cross(-u23, u12))
 
-        ABpl_prime = self.k * (u34 * (distance34 - (1 + self.a *(0.6449**2 - (0.6449*t + 0.6449**2)*np.e**(-t/0.6449)))) 
+        ABpl_prime = self.k * (u34 * (distance34 - (1 + self.a * cortical_integral)) 
                               + u14 * (distance14 - 1)) + self.c * cortical_flow_l * (np.cross(u14, u34) - np.cross(-u14, -u12))
-
 
         # cell wall forces 
         for surface in self.SURFACES:
@@ -72,7 +73,7 @@ class FourCell:
             ABar_prime += self.cell_wall_step(ABar, surface)
             ABpr_prime += self.cell_wall_step(ABpr, surface)
             ABpl_prime += self.cell_wall_step(ABpl, surface)
-
+            
         return np.concatenate((ABal_prime, ABar_prime, ABpr_prime, ABpl_prime))
     
     def step(self, t):
@@ -80,7 +81,7 @@ class FourCell:
         self.euler.append(self.cur_pos)
 
     def run(self):
-        time = np.linspace(1/self.STEPS, 1, self.STEPS-1)
+        time = np.linspace(1, 250, self.STEPS-1)
         for t in time:
             self.step(t)
 
@@ -203,5 +204,5 @@ class FourCell:
 
 if __name__ == "__main__":
     instance = FourCell([0.5, 0.5, 0, 0.5, -0.5, 0, 
-                         -0.5, -0.5, 0, -0.5, 0.5, 0], 6, 2, 100)
+                         -0.5, -0.5, 0, -0.5, 0.5, 0], 1, 0.00001, 1)
     instance.run()

@@ -9,8 +9,6 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import config
 
-
-
 class TwoCell:
 
     def __init__(self, cur_pos, spring_constant, a) -> None:
@@ -170,5 +168,5 @@ class TwoCell:
 
 
 if __name__ == "__main__":
-    instance = TwoCell([0, 0.5, 0, 0, -0.5, 0], 6, 2)
+    instance = TwoCell([0, 0.5-10**(-8), 0, 0, -0.5, 0], 6, 2)
     instance.run()

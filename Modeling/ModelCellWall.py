@@ -1,4 +1,4 @@
-from Cell import FourCellSystem, Cell
+from Modeling.Cell import FourCellSystem, Cell
 from Model.ModelABC import ModelABC
 from Model.Model import Model
 from Least_Distance.minimize import find_min

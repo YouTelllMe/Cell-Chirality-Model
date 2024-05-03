@@ -1,4 +1,4 @@
-from Cell import FourCellSystem
+from Modeling.Cell import FourCellSystem
 
 class Model:
     def __init__(self, A, B, system: FourCellSystem) -> None:

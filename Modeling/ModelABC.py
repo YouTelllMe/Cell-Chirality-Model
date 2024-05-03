@@ -1,4 +1,4 @@
-from Cell import Cell, FourCellSystem
+from Modeling.Cell import Cell, FourCellSystem
 import numpy as np
 import config
 from Model.Model import Model

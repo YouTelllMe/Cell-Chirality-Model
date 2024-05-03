@@ -1,4 +1,4 @@
-import utils
+import DataProcessing
 from models import model_AB
 import numpy as np
 from euler_method import euler
@@ -43,7 +43,7 @@ def resample_n(n_folds: int = 10,
                save: bool = False):
     """
     """
-    original_data = utils.get_data()
+    original_data = DataProcessing.get_data()
 
     A, B = fit_model_whole()[0]
     res = residuals(original_data, A, B)
@@ -102,3 +102,18 @@ def resample(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
             anterior_t,
             )
     
+
+def get_std(df: pd.DataFrame, axis: int = 0):
+    """
+    Return the standard deviation across the specified axis.
+    """
+    return df.std(axis=axis).to_numpy()
+
+
+def t_test(sample1: np.ndarray, sample2: np.ndarray):
+    """
+    Performs the t_test on two data samples for the null hypothesis that 2 independent samples
+    have identical average (expected) values. 
+    """
+    t_test_result = scipy.stats.ttest_ind(sample1, sample2)
+    return t_test_result

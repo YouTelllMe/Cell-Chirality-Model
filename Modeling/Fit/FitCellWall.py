@@ -1,12 +1,12 @@
 import pandas as pd
 from Model.ModelCellWall import ModelCellWall
-import utils
+import DataProcessing
 import numpy as np
 import config
 from scipy.optimize import curve_fit
 from scipy.stats import t
 from Euler import Euler
-from Cell import Cell, FourCellSystem
+from Modeling.Cell import Cell, FourCellSystem
 from collections.abc import Sequence
 
 
@@ -19,7 +19,7 @@ def fit_model_whole():
     dorsal_t,
     anterior_anterior, 
     anterior_dorsal, 
-    anterior_t) = utils.get_data()
+    anterior_t) = DataProcessing.get_data()
 
     manual_distances = np.ones(160)
     dorsal_anterior = dorsal_anterior.to_numpy().flatten("F")

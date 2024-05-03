@@ -38,3 +38,14 @@ def plot_all() -> None:
 
     plot_fit()
 
+
+def column_average(df: pd.DataFrame) -> np.ndarray:
+    """
+    return a column-wise average of a pandas dataframe
+    """
+    col_sum = 0
+    num_cols = len(df.columns)
+    for column in range(num_cols):
+        col_sum += df.iloc[:,column].to_numpy()
+    col_average = col_sum / num_cols
+    return col_average

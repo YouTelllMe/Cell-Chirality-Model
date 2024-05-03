@@ -1,10 +1,10 @@
-from Cell import FourCellSystem, Cell
+from Modeling.Cell import FourCellSystem, Cell
 import config
 import Euler
 import pandas as pd
 import numpy as np
 from Model import ModelABC
-import utils
+import DataProcessing
 from scipy.optimize import fmin, minimize 
 
 #TODO
@@ -14,7 +14,7 @@ def fit_fmin_model(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
     """
 
     if data is None:
-        data = utils.get_data()
+        data = DataProcessing.get_data()
     (dorsal_anterior, 
     dorsal_posterior, 
     dorsal_t,
@@ -38,7 +38,7 @@ def fit_minimize_model(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
     """
 
     if data is None:
-        data = utils.get_data()
+        data = DataProcessing.get_data()
     (dorsal_anterior, 
     dorsal_posterior, 
     dorsal_t,

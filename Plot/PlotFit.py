@@ -1,4 +1,4 @@
-import utils
+import DataProcessing
 import config
 import numpy as np
 import pandas as pd
@@ -14,19 +14,19 @@ def plot_fit():
      dorsal_t,
      anterior_anterior, 
      anterior_posterior, 
-     anterior_t) = utils.get_data()
+     anterior_t) = DataProcessing.get_data()
     
     # average angles for plotting
-    da_average = utils.column_average(dorsal_anterior)
-    dp_average = utils.column_average(dorsal_posterior)
-    aa_average = utils.column_average(anterior_anterior)
-    ap_average = utils.column_average(anterior_posterior)
+    da_average = DataProcessing.column_average(dorsal_anterior)
+    dp_average = DataProcessing.column_average(dorsal_posterior)
+    aa_average = DataProcessing.column_average(anterior_anterior)
+    ap_average = DataProcessing.column_average(anterior_posterior)
 
     # get standard error of the mean
-    da_std = utils.get_std(dorsal_anterior, axis=1) / np.sqrt(config.DATA_STEPS)
-    dp_std = utils.get_std(dorsal_posterior, axis=1) / np.sqrt(config.DATA_STEPS)
-    aa_std = utils.get_std(anterior_anterior, axis=1) / np.sqrt(config.DATA_STEPS)
-    ap_std = utils.get_std(anterior_posterior, axis=1) / np.sqrt(config.DATA_STEPS)
+    da_std = DataProcessing.get_std(dorsal_anterior, axis=1) / np.sqrt(config.DATA_STEPS)
+    dp_std = DataProcessing.get_std(dorsal_posterior, axis=1) / np.sqrt(config.DATA_STEPS)
+    aa_std = DataProcessing.get_std(anterior_anterior, axis=1) / np.sqrt(config.DATA_STEPS)
+    ap_std = DataProcessing.get_std(anterior_posterior, axis=1) / np.sqrt(config.DATA_STEPS)
 
     # load data
     computed_angle = pd.read_csv(config.ANGLES_DATAPATH)
@@ -44,8 +44,8 @@ def plot_fit():
     dorsal_t_test = []
     anterior_t_test = []
     for row_index in range(config.DATA_STEPS):
-        dorsal_row_t_test = utils.t_test(da_np[row_index], dp_np[row_index])
-        anterior_row_t_test = utils.t_test(aa_np[row_index], ap_np[row_index])
+        dorsal_row_t_test = DataProcessing.t_test(da_np[row_index], dp_np[row_index])
+        anterior_row_t_test = DataProcessing.t_test(aa_np[row_index], ap_np[row_index])
         dorsal_t_test.append(dorsal_row_t_test.pvalue >= 0.95)
         anterior_t_test.append(anterior_row_t_test.pvalue >= 0.95)
 

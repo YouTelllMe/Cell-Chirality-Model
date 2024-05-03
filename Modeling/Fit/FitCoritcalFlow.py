@@ -4,7 +4,7 @@ from collections.abc import Sequence
 import pandas as pd 
 import numpy as np
 import config
-import utils
+import DataProcessing
 from scipy.optimize import fmin
 import matplotlib.pyplot as plt
 
@@ -50,7 +50,7 @@ def fit_cortical() -> None:
     corticalflow = pd.read_excel(corticalflow_xls, "corticalflow")
 
     # process raw_data, absolute value negative cortical flow for fitting
-    corticalflow_right, corticalflow_left, time = utils.process_rawdf(corticalflow, "Time (s)")
+    corticalflow_right, corticalflow_left, time = DataProcessing.process_rawdf(corticalflow, "Time (s)")
     corticalflow_left = corticalflow_left.apply(lambda x: abs(x))
     
     # fit data using αte^(-λt)
@@ -58,8 +58,8 @@ def fit_cortical() -> None:
     alpha_l, lambda_l = fmin(fit_cortical_func, [1, 1], args=(time, corticalflow_left, CorticalFlowFit.LINEAR))
 
     # average angles
-    cortical_average_right = utils.column_average(corticalflow_right)
-    cortical_average_left = utils.column_average(corticalflow_left)
+    cortical_average_right = DataProcessing.column_average(corticalflow_right)
+    cortical_average_left = DataProcessing.column_average(corticalflow_left)
 
     # initialize figure and plot
     fig, (axLeft, axRight) = plt.subplots(1, 2)

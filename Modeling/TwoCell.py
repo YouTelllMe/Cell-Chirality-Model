@@ -1,5 +1,5 @@
 import os
-from Cell import Cell
+from Modeling.Cell import Cell
 import math
 from Euler import EulerAnimator
 from Least_Distance.minimize import find_min

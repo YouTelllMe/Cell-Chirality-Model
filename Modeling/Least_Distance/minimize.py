@@ -1,13 +1,6 @@
 from scipy.optimize import minimize
 from numpy.linalg import norm
 
-def distance(x, *args):
-    """
-    Function used in optimization operation. Returns the norm of a point and a fixed point (args[0]). 
-    """
-    return norm(x - args[0])
-
-
 def find_min(x, surface):
     """
     Minimizes L2 norm between a fixed point and a surface. x should be an ndarray and surface should be 
@@ -23,4 +16,11 @@ def find_min(x, surface):
     """
     cons = {'type': 'eq', 'fun': surface}
     return minimize(distance, x, args=(x), constraints=cons)
+
+def distance(x, *args):
+    """
+    Returns the norm of a point and a fixed point. Formatted as required by 
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html
+    """
+    return norm(x - args[0])
 

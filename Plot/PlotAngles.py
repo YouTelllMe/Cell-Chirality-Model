@@ -1,4 +1,4 @@
-import utils
+import DataProcessing
 import config
 from matplotlib.pyplot import Axes
 import pandas as pd
@@ -13,8 +13,8 @@ def plot_angles(ax: Axes,
     Plots the Theta (anterior) vs Phi (dorsal) graph on the given Axes.
     """
     # process raw data
-    anterior_anterior, _, _ = utils.process_rawdf(anterior_df, "Time(s)")
-    dorsal_anterior, _, _ = utils.process_rawdf(dorsal_df, "Time(s)")
+    anterior_anterior, _, _ = DataProcessing.process_rawdf(anterior_df, "Time(s)")
+    dorsal_anterior, _, _ = DataProcessing.process_rawdf(dorsal_df, "Time(s)")
 
     # plots model theta vs phi
     ax.plot(angles_df["dorsal2"].to_numpy(), 

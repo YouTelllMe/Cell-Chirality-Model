@@ -1,7 +1,7 @@
 from Fit.FitCellWall import fit_model_whole
 from Euler import Euler
 from Model.ModelABC import ModelABC
-from Cell import FourCellSystem, Cell
+from Modeling.Cell import FourCellSystem, Cell
 from Model.ModelCellWall import ModelCellWall
 from Model.ModelAB import ModelAB
 import config
@@ -12,6 +12,7 @@ import pandas as pd
 
 def process_rawdf(df: pd.DataFrame, time_name: str) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
+    Process Raw Excel Data into 
     """
     df = df.drop(index=[0]).reset_index(drop=True)
     time = df[time_name]

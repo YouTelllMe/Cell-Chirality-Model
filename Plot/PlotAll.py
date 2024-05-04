@@ -5,6 +5,7 @@ from Plot.PlotDistance import plot_distance
 from Plot.PlotAngles import plot_angles
 from Plot.PlotXZ import plot_xz
 from Plot.PlotFit import plot_fit 
+import numpy as np
 
 
 def plot_all() -> None:

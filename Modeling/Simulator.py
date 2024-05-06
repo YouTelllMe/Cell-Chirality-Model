@@ -10,6 +10,7 @@ class Simulator:
         self.y0 = y0
         self.TAU_INITIAL = 0
         self.TAU_FINAL = 1 # non-dimensionalized
+        self.df = None
 
     def run(self, save: bool) -> None:
         """
@@ -27,11 +28,34 @@ class Simulator:
             solver.step() # last step included
 
         format_y = np.transpose(np.array(solver.y))
-        df = pd.DataFrame(format_y, columns=[str(index) for index in range(12)], index=solver.t)
+        self.df = pd.DataFrame(format_y, columns=[str(index) for index in range(len())], index=solver.t)
 
+        self.compute_distance()
 
         if save:
-            df.to_excel('output.xlsx')
+            self.df.to_excel('output.xlsx')
+
+    def compute_distance(self):
+        """
+        """
+        if self.df == None:
+            raise(Exception("DataFrame not Found."))
+        df_distance = pd.DataFrame([])
+        df_distance["12"] = np.sqrt((self.df["0"]-self.df["3"])**2 + (self.df["1"]-self.df["4"])**2 + (self.df["2"]-self.df["5"])**2)
+        print(df_distance["12"].head())
+        return df_distance
+    
+    def compute_angles(self):
+        """
+        """
+        if self.df == None:
+            raise(Exception("DataFrame not Found."))
+
+        df_angle = pd.DataFrame([])
+        return df_angle
+
+
+
         # print(df)
 
 

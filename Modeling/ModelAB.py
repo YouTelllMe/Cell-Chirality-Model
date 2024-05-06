@@ -7,8 +7,6 @@ class ModelAB:
         """
         A division by 0 occurs when two cells overlap
         """
-
-        t_final = 195
         ABal = np.array([y[0], y[1], y[2]])
         ABar = np.array([y[3], y[4], y[5]])
         ABpr = np.array([y[6], y[7], y[8]])
@@ -31,15 +29,15 @@ class ModelAB:
 
         cortical_flow_r = np.multiply(0.000345*t, np.e**(-0.012732*t))
         cortical_flow_l = np.multiply(0.00071*t, np.e**(-0.0166*t))
-
-        ABal_prime = t_final * (kwargs['B'] * ((dist12 - 1) * u12 + 
+        print(kwargs)
+        ABal_prime = kwargs['t_final'] * (kwargs['B'] * ((dist12 - 1) * u12 + 
                                         (dist13 - 1) * u13 - 
                                         (ABal[2] - 0.5) * k_hat) + 
                                 kwargs['A'] * cortical_flow_r * 
                                         (np.cross(-u12, u24) - 
                                         np.cross(u12, u13) -
                                         np.cross(u13, k_hat)))
-        ABar_prime = t_final * (kwargs['B'] * ((dist12 - 1) * -u12 + 
+        ABar_prime = kwargs['t_final'] * (kwargs['B'] * ((dist12 - 1) * -u12 + 
                                         (dist24 - 1) * u24 - 
                                         (ABar[2] - 0.5) * k_hat) + 
                                 kwargs['A'] * cortical_flow_r * 
@@ -47,7 +45,7 @@ class ModelAB:
                                         np.cross(-u12, u24) -
                                         np.cross(u24, k_hat)))
 
-        ABpr_prime = t_final * (kwargs['B'] * ((dist13 - 1) * -u13 + 
+        ABpr_prime = kwargs['t_final'] * (kwargs['B'] * ((dist13 - 1) * -u13 + 
                                         (dist34 - 1) * u34 - 
                                         (ABpr[2] - 0.5) * k_hat) + 
                                 kwargs['A'] * cortical_flow_l * 
@@ -55,7 +53,7 @@ class ModelAB:
                                         np.cross(u34, -u13) -
                                         np.cross(-u13, k_hat)))
 
-        ABpl_prime = t_final * (kwargs['B'] * ((dist24 - 1) * -u24 +
+        ABpl_prime = kwargs['t_final'] * (kwargs['B'] * ((dist24 - 1) * -u24 +
                                         (dist34 - 1) * -u34 - 
                                         (ABpl[2] - 0.5) * k_hat) + 
                                 kwargs['A'] * cortical_flow_l * 
@@ -65,12 +63,12 @@ class ModelAB:
         
         # applies spring force across cells in next iteration
         if dist13 <= 1:
-                ABal_prime += t_final * kwargs['B'] * (dist13 - 1) * u13
-                ABpl_prime += t_final * kwargs['B'] * (dist13 - 1) * -u13
+                ABal_prime += kwargs['t_final'] * kwargs['B'] * (dist13 - 1) * u13
+                ABpl_prime += kwargs['t_final'] * kwargs['B'] * (dist13 - 1) * -u13
 
         if dist24 <= 1:
-                ABar_prime += t_final * kwargs['B'] * (dist24 - 1) * u24
-                ABpr_prime += t_final * kwargs['B'] * (dist24 - 1) * -u24
+                ABar_prime += kwargs['t_final'] * kwargs['B'] * (dist24 - 1) * u24
+                ABpr_prime += kwargs['t_final'] * kwargs['B'] * (dist24 - 1) * -u24
 
         return np.concatenate((ABal_prime, 
                                ABar_prime, 

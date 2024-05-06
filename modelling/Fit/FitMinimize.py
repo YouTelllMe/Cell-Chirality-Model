@@ -1,20 +1,14 @@
-from Modeling.Cell import FourCellSystem, Cell
-import old.config as config
-import Modeling.Simulator as Simulator
 import pandas as pd
 import numpy as np
-from Model import ModelABC
-import DataProcessing
 from scipy.optimize import fmin, minimize 
+from ..ModelAB import ModelAB
+from ..Simulator import Simulator
 
-#TODO
 def fit_fmin_model(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
                          pd.DataFrame, pd.DataFrame, pd.DataFrame] | None = None) -> tuple[float, float]:
     """
     """
 
-    if data is None:
-        data = DataProcessing.get_data()
     (dorsal_anterior, 
     dorsal_posterior, 
     dorsal_t,
@@ -22,38 +16,14 @@ def fit_fmin_model(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
     anterior_dorsal, 
     anterior_t) = data
         
-    A, B, C = fmin(residual_squared, 
-                config.GUESS, 
+    A, B = fmin(residual_squared, 
+                [1,1], 
                 args=(anterior_anterior, 
                     anterior_dorsal,
                     dorsal_anterior, 
                     dorsal_posterior, 
                     ))
-    return (A, B, C)
-
-#TODO
-def fit_minimize_model(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
-                         pd.DataFrame, pd.DataFrame, pd.DataFrame] | None = None) -> tuple[float, float]:
-    """
-    """
-
-    if data is None:
-        data = DataProcessing.get_data()
-    (dorsal_anterior, 
-    dorsal_posterior, 
-    dorsal_t,
-    anterior_anterior, 
-    anterior_dorsal, 
-    anterior_t) = data
-        
-    A, B, C = minimize(residual_squared, 
-                config.GUESS, 
-                args=(anterior_anterior, 
-                    anterior_dorsal,
-                    dorsal_anterior, 
-                    dorsal_posterior, 
-                    ))
-    return (A, B, C)
+    return (A, B)
 
 
 def residual_squared(x: tuple[float, float, float], 
@@ -65,27 +35,16 @@ def residual_squared(x: tuple[float, float, float],
     residual_squares of angles
     """
     # initial point not included within tau
-    A, B, C = x
-    N = config.MODEL_STEPS
-    # takes 400 steps (initial position vector inclusive)
-    tau = np.linspace(1/N, 1, N-1)
+    A, B = x
+    sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=A, B=B, t_final=195)
+    sim.run(False)
 
-    _, computed_distances, computed_angle = Simulator(ModelABC(A, B, C, 
-            FourCellSystem(
-                Cell((-0.5,0.5,0.5)), 
-                Cell((0.5,0.5,0.5)), 
-                Cell((-0.5,-0.5,0.5)), 
-                Cell((0.5,-0.5,0.5))
-            ))
-    ).run(False)
-
-    computed_data_index = range(0, config.MODEL_STEPS, config.STEP_SCALE)
-    computed_dorsal_1 = computed_angle["dorsal1"][computed_data_index].to_numpy()
-    computed_dorsal_2 = computed_angle["dorsal2"][computed_data_index].to_numpy()
-    computed_anterior_1 = computed_angle["anterior1"][computed_data_index].to_numpy()
-    computed_anterior_2 = computed_angle["anterior2"][computed_data_index].to_numpy()
+    computed_dorsal_1 = sim.angle["dorsal_ABa"].to_numpy()
+    computed_dorsal_2 = sim.angle["dorsal_ABp"].to_numpy()
+    computed_anterior_1 = sim.angle["anterior_ABa"].to_numpy()
+    computed_anterior_2 = sim.angle["anterior_ABp"].to_numpy()
     residual_square = 0
-    for column_index in range(config.DATA_N):
+    for column_index in range(10):
         da_residual = dorsal_anterior.iloc[:,column_index].to_numpy() - computed_dorsal_2
         dp_residual = dorsal_posterior.iloc[:,column_index].to_numpy() - computed_dorsal_1
         aa_residual = anterior_anterior.iloc[:,column_index].to_numpy() - computed_anterior_2
@@ -99,9 +58,9 @@ def residual_squared(x: tuple[float, float, float],
     epsilon = 1
 
     # makes distance 1
-    residual_square += epsilon * ((np.sum(computed_distances["12"].to_numpy() - np.ones(400))) ** 2 +
-                                (np.sum(computed_distances["24"].to_numpy() - np.ones(400))) ** 2 +
-                                (np.sum(computed_distances["34"].to_numpy() - np.ones(400))) ** 2 +
-                                (np.sum(computed_distances["13"].to_numpy() - np.ones(400))) ** 2)
+    residual_square += epsilon * ((np.sum(sim.distance["12"].to_numpy() - np.ones(40))) ** 2 +
+                                (np.sum(sim.distance["24"].to_numpy() - np.ones(40))) ** 2 +
+                                (np.sum(sim.distance["34"].to_numpy() - np.ones(40))) ** 2 +
+                                (np.sum(sim.distance["13"].to_numpy() - np.ones(40))) ** 2)
     print(residual_square)
     return residual_square

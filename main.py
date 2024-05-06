@@ -33,6 +33,7 @@ from modelling.ModelAB import ModelAB
 from plot.Animator import Animator
 from utils import get_data
 from modelling.Fit.FitCurveFit import fit_model_whole
+from modelling.Fit.FitMinimize import fit_fmin_model
 
 #TODO
 """
@@ -49,12 +50,15 @@ thing about the z plane and cells going beneath it
 
 
 
-# sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=1, B=0.01, t_final=195)
-# sim.run(True)
+sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=24.391702590834782, B=0.019015984443137957, t_final=195)
+# (24.391702590834782, 0.019015984443137957)
+sim.run(True)
 # SURFACES = [lambda x: (2*x[0]/3)**2 + x[1]**2 + x[2]**2 - 1]
-
 # animator = Animator(sim.df)
 # animator.animate()
 
-data = get_data()
-print(fit_model_whole(data))
+# data = get_data()
+# print(fit_fmin_model(get_data()))
+
+animator = Animator(sim.df)
+animator.animate()

@@ -6,11 +6,17 @@ from scipy.integrate import solve_ivp
 class Simulator:
 
     def __init__(self, model, y0, **kwargs) -> None:
-        self.fun = lambda t, y: model.get_velocity(t, y, A = kwargs['A'], B = kwargs['B'])
         self.y0 = y0
         self.TAU_INITIAL = 0
         self.TAU_FINAL = 1 # non-dimensionalized
-        self.df = None
+        self.fun = lambda t, y: model.get_velocity(t, y, 
+                                                   A = kwargs['A'], 
+                                                   B = kwargs['B'], 
+                                                   t_final = kwargs['t_final'])
+
+        self.df = pd.DataFrame([])
+        self.df_distance = pd.DataFrame([])
+        self.angles = pd.DataFrame([])
 
     def run(self, save: bool) -> None:
         """
@@ -23,32 +29,39 @@ class Simulator:
                            self.y0, 
                            t_eval = np.linspace(self.TAU_INITIAL, self.TAU_FINAL, 40)
                            )
-
-        while solver.status == "running":
-            solver.step() # last step included
+        
+        if solver.status != 0:
+            raise(Exception("RK45 Solve Failed"))
+        
 
         format_y = np.transpose(np.array(solver.y))
-        self.df = pd.DataFrame(format_y, columns=[str(index) for index in range(len())], index=solver.t)
-
+        self.df = pd.DataFrame(format_y, columns=[str(index) for index in range(12)], index=solver.t)
         self.compute_distance()
+        self.compute_angles()
 
         if save:
             self.df.to_excel('output.xlsx')
+            self.df_distance.to_excel('distances.xlsx')
+            self.angles.to_excel('angles.xlsx')
+            
 
     def compute_distance(self):
         """
         """
-        if self.df == None:
+        if self.df.empty:
             raise(Exception("DataFrame not Found."))
-        df_distance = pd.DataFrame([])
-        df_distance["12"] = np.sqrt((self.df["0"]-self.df["3"])**2 + (self.df["1"]-self.df["4"])**2 + (self.df["2"]-self.df["5"])**2)
-        print(df_distance["12"].head())
-        return df_distance
+        
+        self.df_distance["12"] = np.sqrt((self.df["0"]-self.df["3"])**2 + (self.df["1"]-self.df["4"])**2 + (self.df["2"]-self.df["5"])**2)
+        self.df_distance["13"] = np.sqrt((self.df["0"]-self.df["6"])**2 + (self.df["1"]-self.df["7"])**2 + (self.df["2"]-self.df["8"])**2)
+        self.df_distance["14"] = np.sqrt((self.df["0"]-self.df["9"])**2 + (self.df["1"]-self.df["10"])**2 + (self.df["2"]-self.df["11"])**2)
+        self.df_distance["23"] = np.sqrt((self.df["3"]-self.df["6"])**2 + (self.df["4"]-self.df["7"])**2 + (self.df["5"]-self.df["8"])**2)
+        self.df_distance["24"] = np.sqrt((self.df["3"]-self.df["9"])**2 + (self.df["4"]-self.df["10"])**2 + (self.df["5"]-self.df["11"])**2)
+        self.df_distance["34"] = np.sqrt((self.df["6"]-self.df["9"])**2 + (self.df["7"]-self.df["10"])**2 + (self.df["8"]-self.df["11"])**2)
     
     def compute_angles(self):
         """
         """
-        if self.df == None:
+        if self.df.empty:
             raise(Exception("DataFrame not Found."))
 
         df_angle = pd.DataFrame([])

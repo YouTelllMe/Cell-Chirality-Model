@@ -29,7 +29,6 @@ class ModelAB:
 
         cortical_flow_r = np.multiply(0.000345*t, np.e**(-0.012732*t))
         cortical_flow_l = np.multiply(0.00071*t, np.e**(-0.0166*t))
-        print(kwargs)
         ABal_prime = kwargs['t_final'] * (kwargs['B'] * ((dist12 - 1) * u12 + 
                                         (dist13 - 1) * u13 - 
                                         (ABal[2] - 0.5) * k_hat) + 

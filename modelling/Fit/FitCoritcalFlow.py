@@ -3,7 +3,7 @@ from enum import Enum, auto
 from collections.abc import Sequence
 import pandas as pd 
 import numpy as np
-import config
+import old.config as config
 import DataProcessing
 from scipy.optimize import fmin
 import matplotlib.pyplot as plt

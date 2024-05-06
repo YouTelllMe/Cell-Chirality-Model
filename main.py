@@ -10,18 +10,8 @@
 # from Fit.FitCellWall import fit_model_whole
 # import pandas as pd
 
-# def process_rawdf(df: pd.DataFrame, time_name: str) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-#     """
-#     Process Raw Excel Data into 
-#     """
-#     df = df.drop(index=[0]).reset_index(drop=True)
-#     time = df[time_name]
-#     df = df.drop(columns=[time_name])
-#     assert len(df.columns) == config.DATA_N * 2, "data format incorrect when processing raw df"
-#     df_right = df.iloc[:, 0:config.DATA_N]
-#     df_left = df.iloc[:, config.DATA_N:config.DATA_N * 2]
-
-#     return (df_right, df_left, time)
+# import config
+# import pandas as pd
 
 
 # if __name__ == "__main__":
@@ -31,21 +21,22 @@
 #     # remove first two rows
 #     dorsal = pd.read_excel(dorsal_xls, "dorsal")
 #     anterior = pd.read_excel(anterior_xls, "anterior")
-#     dorsal_anterior, dorsal_posterior, dorsal_t = process_rawdf(dorsal, "Time(s)")
-#     anterior_anterior, anterior_posterior, anterior_t = process_rawdf(anterior, "Time(s)")
+#     ABa_dorsal, ABp_dorsal, dorsal_t = process_rawdf(dorsal, "Time(s)")
+#     ABa_ant, ABp_ant, anterior_t = process_rawdf(anterior, "Time(s)")
 
-#     processed_data = (dorsal_anterior, dorsal_posterior, dorsal_t, 
-#             anterior_anterior, anterior_posterior, anterior_t)
+#     processed_data = (ABa_dorsal, ABp_dorsal, ABa_ant, ABp_ant)
 
 
 
 from modelling.Simulator import Simulator
 from modelling.ModelAB import ModelAB
 from plot.Animator import Animator
+from utils import get_data
+from modelling.Fit.FitCurveFit import fit_model_whole
 
 #TODO
 """
-Fix Animator
+Fix Fit
 Fix Plots
 Fix Paths / Config
 Fix Fitting of Cortical Flow
@@ -58,10 +49,12 @@ thing about the z plane and cells going beneath it
 
 
 
-
-sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=1, B=1, t_final=195)
-sim.run(True)
+# sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=1, B=0.01, t_final=195)
+# sim.run(True)
 # SURFACES = [lambda x: (2*x[0]/3)**2 + x[1]**2 + x[2]**2 - 1]
 
-animator = Animator(sim.df)
-animator.animate()
+# animator = Animator(sim.df)
+# animator.animate()
+
+data = get_data()
+print(fit_model_whole(data))

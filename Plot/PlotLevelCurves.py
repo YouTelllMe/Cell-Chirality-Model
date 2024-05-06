@@ -1,5 +1,5 @@
 import pandas as pd
-import config
+import old.config as config
 import matplotlib.pyplot as plt
 from stats import resample_ci
 from matplotlib.patches import Rectangle

@@ -2,7 +2,7 @@ import pandas as pd
 from Model.ModelCellWall import ModelCellWall
 import DataProcessing
 import numpy as np
-import config
+import old.config as config
 from scipy.optimize import curve_fit
 from scipy.stats import t
 from Modeling.Simulator import Euler

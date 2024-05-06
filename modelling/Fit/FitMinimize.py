@@ -1,5 +1,5 @@
 from Modeling.Cell import FourCellSystem, Cell
-import config
+import old.config as config
 import Modeling.Simulator as Simulator
 import pandas as pd
 import numpy as np

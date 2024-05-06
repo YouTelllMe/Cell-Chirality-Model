@@ -1,5 +1,5 @@
 import pandas as pd
-import config
+import old.config as config
 import matplotlib.pyplot as plt
 from Plot.PlotDistance import plot_distance
 from Plot.PlotAngles import plot_angles

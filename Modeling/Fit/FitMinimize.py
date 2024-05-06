@@ -1,6 +1,6 @@
 from Modeling.Cell import FourCellSystem, Cell
 import config
-import Euler
+import Modeling.Simulator as Simulator
 import pandas as pd
 import numpy as np
 from Model import ModelABC
@@ -70,7 +70,7 @@ def residual_squared(x: tuple[float, float, float],
     # takes 400 steps (initial position vector inclusive)
     tau = np.linspace(1/N, 1, N-1)
 
-    _, computed_distances, computed_angle = Euler(ModelABC(A, B, C, 
+    _, computed_distances, computed_angle = Simulator(ModelABC(A, B, C, 
             FourCellSystem(
                 Cell((-0.5,0.5,0.5)), 
                 Cell((0.5,0.5,0.5)), 

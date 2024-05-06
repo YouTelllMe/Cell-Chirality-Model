@@ -4,7 +4,7 @@ import numpy as np
 import config
 from scipy.optimize import curve_fit
 from scipy.stats import t
-from Euler import Euler
+from Modeling.Simulator import Euler
 from Modeling.Cell import Cell, FourCellSystem
 from collections.abc import Sequence
 from Model.ModelABC import ModelABC

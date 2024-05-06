@@ -1,7 +1,7 @@
 import os
 from Modeling.Cell import Cell
 import math
-from Euler import EulerAnimator
+from Modeling.Simulator import EulerAnimator
 from Least_Distance.minimize import find_min
 import numpy as np
 import pandas as pd

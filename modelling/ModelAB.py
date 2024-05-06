@@ -30,35 +30,35 @@ class ModelAB:
         cortical_flow_r = np.multiply(0.000345*t, np.e**(-0.012732*t))
         cortical_flow_l = np.multiply(0.00071*t, np.e**(-0.0166*t))
         ABal_prime = kwargs['t_final'] * (kwargs['B'] * ((dist12 - 1) * u12 + 
-                                        (dist13 - 1) * u13 - 
+                                        (dist14 - 1) * u14 - 
                                         (ABal[2] - 0.5) * k_hat) + 
-                                kwargs['A'] * cortical_flow_r * 
-                                        (np.cross(-u12, u24) - 
-                                        np.cross(u12, u13) -
-                                        np.cross(u13, k_hat)))
+                                kwargs['A'] * cortical_flow_l * 
+                                        (np.cross(-u14, -u34) - 
+                                        np.cross(u14, u12) -
+                                        np.cross(-u12, k_hat)))
         ABar_prime = kwargs['t_final'] * (kwargs['B'] * ((dist12 - 1) * -u12 + 
-                                        (dist24 - 1) * u24 - 
+                                        (dist23 - 1) * u23 - 
                                         (ABar[2] - 0.5) * k_hat) + 
                                 kwargs['A'] * cortical_flow_r * 
-                                        (np.cross(u12, u13) -
-                                        np.cross(-u12, u24) -
-                                        np.cross(u24, k_hat)))
+                                        (np.cross(-u23, u34) -
+                                        np.cross(u23, -u12) -
+                                        np.cross(u12, k_hat)))
 
-        ABpr_prime = kwargs['t_final'] * (kwargs['B'] * ((dist13 - 1) * -u13 + 
+        ABpr_prime = kwargs['t_final'] * (kwargs['B'] * ((dist23 - 1) * -u23 + 
                                         (dist34 - 1) * u34 - 
                                         (ABpr[2] - 0.5) * k_hat) + 
-                                kwargs['A'] * cortical_flow_l * 
-                                        (np.cross(-u34, -u24) -
-                                        np.cross(u34, -u13) -
-                                        np.cross(-u13, k_hat)))
+                                kwargs['A'] * cortical_flow_r * 
+                                        (np.cross(u23, -u12) -
+                                        np.cross(-u23, u34) -
+                                        np.cross(-u34, k_hat)))
 
         ABpl_prime = kwargs['t_final'] * (kwargs['B'] * ((dist24 - 1) * -u24 +
                                         (dist34 - 1) * -u34 - 
                                         (ABpl[2] - 0.5) * k_hat) + 
                                 kwargs['A'] * cortical_flow_l * 
-                                        (np.cross(u34, -u13) -
-                                        np.cross(-u34, -u24) -
-                                        np.cross(-u24, k_hat)))
+                                        (np.cross(u14, u12) -
+                                        np.cross(-u14, u34) -
+                                        np.cross(u34, k_hat)))
         
         # applies spring force across cells in next iteration
         if dist13 <= 1:

@@ -37,10 +37,15 @@ from modelling.Fit.FitMinimize import fit_fmin_model
 
 #TODO
 """
-Fix Fit
-Fix Plots
-Fix Paths / Config
-Fix Fitting of Cortical Flow
+SMT is messed up, check:
+- equations on paper and in code
+- angle calculations
+- there should be a bug somewhere in the code that's causing these residuals to be wild
+
+
+
+Fix Fit?
+Fix Plots?
 
 
 notes:
@@ -50,15 +55,13 @@ thing about the z plane and cells going beneath it
 
 
 
-sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=24.391702590834782, B=0.019015984443137957, t_final=195)
-# (24.391702590834782, 0.019015984443137957)
+sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=4.683484906208419, B=1.2174858680302194, t_final=195)
+# (4.683484906208419, 1.2174858680302194)
 sim.run(True)
 # SURFACES = [lambda x: (2*x[0]/3)**2 + x[1]**2 + x[2]**2 - 1]
-# animator = Animator(sim.df)
-# animator.animate()
 
 # data = get_data()
-# print(fit_fmin_model(get_data()))
+# print(fit_model_whole(get_data()))
 
 animator = Animator(sim.df)
 animator.animate()

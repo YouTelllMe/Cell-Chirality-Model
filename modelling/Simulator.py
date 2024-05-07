@@ -81,12 +81,12 @@ class Simulator:
 
         #dorsal view ; dorsal view is top down; (x,y), (-1,0) is 0 degrees. Use dot product rule to obtain. 
         #-ABa['-x'] because the axis should be position 2 - position 1
-        self.angle['dorsal_ABa'] = np.arccos(-ABa['-x']/np.sqrt(ABa['x']**2 + ABa['y']**2))
-        self.angle['dorsal_ABp'] = np.arccos(-ABp['-x']/np.sqrt(ABp['x']**2 + ABp['y']**2))
+        self.angle['dorsal_ABa'] = np.arccos(-ABa['-x']/np.sqrt(ABa['x']**2 + ABa['y']**2)) * 180 / np.pi
+        self.angle['dorsal_ABp'] = np.arccos(-ABp['-x']/np.sqrt(ABp['x']**2 + ABp['y']**2)) * 180 / np.pi
 
         #anterior view ; anterior view is from the front; (y,z), (1,0) is 0 degrees. Dot with (1,0)
-        self.angle['anterior_ABa'] = np.arccos(ABa['y']/np.sqrt(ABa['y']**2 + ABa['z']**2))
-        self.angle['anterior_ABp'] = np.arccos(ABp['y']/np.sqrt(ABp['y']**2 + ABp['z']**2))
+        self.angle['anterior_ABa'] = np.arccos(ABa['y']/np.sqrt(ABa['y']**2 + ABa['z']**2)) * 180 / np.pi
+        self.angle['anterior_ABp'] = np.arccos(ABp['y']/np.sqrt(ABp['y']**2 + ABp['z']**2)) * 180 / np.pi
 
 
         for i in range(len(self.angle.index)):

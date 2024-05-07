@@ -9,28 +9,19 @@ def fit_fmin_model(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
     """
     """
 
-    (dorsal_anterior, 
-    dorsal_posterior, 
-    dorsal_t,
-    anterior_anterior, 
-    anterior_dorsal, 
-    anterior_t) = data
+    (ABa_dorsal, ABp_dorsal, dorsal_t, ABa_ant, ABp_ant, anterior_t) = data
         
     A, B = fmin(residual_squared, 
                 [1,1], 
-                args=(anterior_anterior, 
-                    anterior_dorsal,
-                    dorsal_anterior, 
-                    dorsal_posterior, 
-                    ))
+                args=(ABa_dorsal, ABp_dorsal, ABa_ant, ABp_ant))
     return (A, B)
 
 
 def residual_squared(x: tuple[float, float, float], 
-        anterior_anterior: pd.DataFrame, 
-        anterior_dorsal: pd.DataFrame, 
-        dorsal_anterior: pd.DataFrame, 
-        dorsal_posterior: pd.DataFrame):
+        ABa_dorsal: pd.DataFrame, 
+        ABp_dorsal: pd.DataFrame, 
+        ABa_ant: pd.DataFrame, 
+        ABp_ant: pd.DataFrame):
     """
     residual_squares of angles
     """
@@ -39,21 +30,22 @@ def residual_squared(x: tuple[float, float, float],
     sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=A, B=B, t_final=195)
     sim.run(False)
 
-    computed_dorsal_1 = sim.angle["dorsal_ABa"].to_numpy()
-    computed_dorsal_2 = sim.angle["dorsal_ABp"].to_numpy()
-    computed_anterior_1 = sim.angle["anterior_ABa"].to_numpy()
-    computed_anterior_2 = sim.angle["anterior_ABp"].to_numpy()
+    dorsal_ABa = sim.angle["dorsal_ABa"].to_numpy()
+    dorsal_ABp = sim.angle["dorsal_ABp"].to_numpy()
+    anterior_ABa = sim.angle["anterior_ABa"].to_numpy()
+    anterior_ABp = sim.angle["anterior_ABp"].to_numpy()
     residual_square = 0
+
     for column_index in range(10):
-        da_residual = dorsal_anterior.iloc[:,column_index].to_numpy() - computed_dorsal_2
-        dp_residual = dorsal_posterior.iloc[:,column_index].to_numpy() - computed_dorsal_1
-        aa_residual = anterior_anterior.iloc[:,column_index].to_numpy() - computed_anterior_2
-        ad_residual = anterior_dorsal.iloc[:,column_index].to_numpy() - computed_anterior_1
+        da_residual = ABa_dorsal.iloc[:,column_index].to_numpy() - dorsal_ABa
+        dp_residual = ABp_dorsal.iloc[:,column_index].to_numpy() - dorsal_ABp
+        aa_residual = ABa_ant.iloc[:,column_index].to_numpy() - anterior_ABa
+        ap_residual = ABp_ant.iloc[:,column_index].to_numpy() - anterior_ABp
         
         residual_square += (np.linalg.norm(da_residual) ** 2
                           + np.linalg.norm(dp_residual) ** 2
                           + np.linalg.norm(aa_residual) ** 2
-                          + np.linalg.norm(ad_residual) ** 2)
+                          + np.linalg.norm(ap_residual) ** 2)
 
     epsilon = 1
 

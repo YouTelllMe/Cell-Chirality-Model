@@ -27,7 +27,7 @@ def fit_model_whole(raw_data):
     y_data = np.concatenate((dorsal_anterior, dorsal_posterior, anterior_anterior, anterior_dorsal, manual_distances))
     x_data = ()
 
-    popt, pcov = curve_fit(fit_model_curve, x_data, y_data)
+    popt, pcov = curve_fit(fit_model_curve, x_data, y_data, p0=(20,1))
 
     alpha = 0.05 # 95% confidence interval = 100*(1-alpha)
     n = len(y_data)    # number of data points

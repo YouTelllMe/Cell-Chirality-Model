@@ -88,7 +88,7 @@ class Simulator:
         self.angle['anterior_ABa'] = np.arccos(ABa['y']/np.sqrt(ABa['y']**2 + ABa['z']**2)) * 180 / np.pi
         self.angle['anterior_ABp'] = np.arccos(ABp['y']/np.sqrt(ABp['y']**2 + ABp['z']**2)) * 180 / np.pi
 
-
+        # print(self.angle.head())
         for i in range(len(self.angle.index)):
             if ABa.at[i,'z'] < 0:
                 self.angle.at[i,'anterior_ABa'] *= -1

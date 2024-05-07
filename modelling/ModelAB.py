@@ -25,7 +25,7 @@ class ModelAB:
         u23 = (ABpr-ABar) / dist23 # 3-2
         u24 = (ABpl-ABar) / dist24 # 4-2
         u34 = (ABpl-ABpr) / dist34 # 4-3
-        k_hat = np.array([0,0,0])
+        k_hat = np.array([0,0,1])
 
         cortical_flow_r = np.multiply(0.000345*t, np.e**(-0.012732*t))
         cortical_flow_l = np.multiply(0.00071*t, np.e**(-0.0166*t))
@@ -52,7 +52,7 @@ class ModelAB:
                                         np.cross(-u23, u34) -
                                         np.cross(-u34, k_hat)))
 
-        ABpl_prime = kwargs['t_final'] * (kwargs['B'] * ((dist24 - 1) * -u24 +
+        ABpl_prime = kwargs['t_final'] * (kwargs['B'] * ((dist14 - 1) * -u14 +
                                         (dist34 - 1) * -u34 - 
                                         (ABpl[2] - 0.5) * k_hat) + 
                                 kwargs['A'] * cortical_flow_l * 
@@ -63,11 +63,11 @@ class ModelAB:
         # applies spring force across cells in next iteration
         if dist13 <= 1:
                 ABal_prime += kwargs['t_final'] * kwargs['B'] * (dist13 - 1) * u13
-                ABpl_prime += kwargs['t_final'] * kwargs['B'] * (dist13 - 1) * -u13
+                ABpr_prime += kwargs['t_final'] * kwargs['B'] * (dist13 - 1) * -u13
 
         if dist24 <= 1:
                 ABar_prime += kwargs['t_final'] * kwargs['B'] * (dist24 - 1) * u24
-                ABpr_prime += kwargs['t_final'] * kwargs['B'] * (dist24 - 1) * -u24
+                ABpl_prime += kwargs['t_final'] * kwargs['B'] * (dist24 - 1) * -u24
 
         return np.concatenate((ABal_prime, 
                                ABar_prime, 

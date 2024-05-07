@@ -1,14 +1,12 @@
 import numpy as np
+from modelling.least_distance.minimize import find_min
+import time
 
-from Least_Distance.minimize import find_min
-from ModelAB import ModelAB
 
-
-class FourCell:
+class ModelExtendingSpring:
 
     @staticmethod
     def get_velocity(t, y, **kwargs):
-
         """
         A division by 0 occurs when two cells overlap
         """
@@ -30,10 +28,9 @@ class FourCell:
         u23 = (ABpr-ABar) / dist23 # 3-2
         u24 = (ABpl-ABar) / dist24 # 4-2
         u34 = (ABpl-ABpr) / dist34 # 4-3
-        k_hat = np.array([0,0,0])
 
-        cortical_flow_r = np.multiply(0.000345*t, np.e**(-0.012732*t))
-        cortical_flow_l = np.multiply(0.00071*t, np.e**(-0.0166*t))
+        cortical_flow_r = np.multiply(0.000345*t*kwargs['t_final'], np.e**(-0.012732*t*kwargs['t_final']))
+        cortical_flow_l = np.multiply(0.00071*t*kwargs['t_final'], np.e**(-0.0166*t*kwargs['t_final']))
         ABal_prime = kwargs['t_final'] * (kwargs['B'] * ((dist12 - 1) * u12 + 
                                         (dist14 - 1) * u14) + 
                                 kwargs['A'] * cortical_flow_l * 
@@ -51,28 +48,30 @@ class FourCell:
                                         (np.cross(u23, -u12) -
                                         np.cross(-u23, u34)))
 
-        ABpl_prime = kwargs['t_final'] * (kwargs['B'] * ((dist24 - 1) * -u24 +
+        ABpl_prime = kwargs['t_final'] * (kwargs['B'] * ((dist14 - 1) * -u14 +
                                         (dist34 - 1) * -u34) + 
                                 kwargs['A'] * cortical_flow_l * 
                                         (np.cross(u14, u12) -
-                                        np.cross(-u14, u34)))
+                                        np.cross(-u14, -u34)))
         
         # applies spring force across cells in next iteration
         if dist13 <= 1:
                 ABal_prime += kwargs['t_final'] * kwargs['B'] * (dist13 - 1) * u13
-                ABpl_prime += kwargs['t_final'] * kwargs['B'] * (dist13 - 1) * -u13
+                ABpr_prime += kwargs['t_final'] * kwargs['B'] * (dist13 - 1) * -u13
 
         if dist24 <= 1:
                 ABar_prime += kwargs['t_final'] * kwargs['B'] * (dist24 - 1) * u24
-                ABpr_prime += kwargs['t_final'] * kwargs['B'] * (dist24 - 1) * -u24
+                ABpl_prime += kwargs['t_final'] * kwargs['B'] * (dist24 - 1) * -u24
 
         # cell wall forces 
+        start = time.time()
         for surface in kwargs['surfaces']:
-            ABal_prime += kwargs['t_final'] * kwargs['B'] * FourCell._cell_wall_step(ABal, surface)
-            ABar_prime += kwargs['t_final'] * kwargs['B'] * FourCell._cell_wall_step(ABar, surface)
-            ABpr_prime += kwargs['t_final'] * kwargs['B'] * FourCell._cell_wall_step(ABpr, surface)
-            ABpl_prime += kwargs['t_final'] * kwargs['B'] * FourCell._cell_wall_step(ABpl, surface)
-            
+            ABal_prime += kwargs['t_final'] * kwargs['B'] * ModelExtendingSpring._cell_wall_step(ABal, surface)
+            ABar_prime += kwargs['t_final'] * kwargs['B'] * ModelExtendingSpring._cell_wall_step(ABar, surface)
+            ABpr_prime += kwargs['t_final'] * kwargs['B'] * ModelExtendingSpring._cell_wall_step(ABpr, surface)
+            ABpl_prime += kwargs['t_final'] * kwargs['B'] * ModelExtendingSpring._cell_wall_step(ABpl, surface)
+        print("time(s): ", time.time()-start)
+
         return np.concatenate((ABal_prime, ABar_prime, ABpr_prime, ABpl_prime))
     
 

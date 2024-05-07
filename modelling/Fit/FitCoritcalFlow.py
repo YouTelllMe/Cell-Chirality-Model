@@ -3,10 +3,10 @@ from enum import Enum, auto
 from collections.abc import Sequence
 import pandas as pd 
 import numpy as np
-import old.config as config
-import DataProcessing
 from scipy.optimize import fmin
 import matplotlib.pyplot as plt
+
+
 
 
 @dataclass
@@ -34,23 +34,19 @@ def fit_cortical_func(x: tuple[float, float], time: Sequence, data: pd.DataFrame
         output = alpha * time**2 * np.e**(-lam * time)
 
     residual_squared = 0 
-    for column_index in range(config.DATA_N):
+    for column_index in range(10):
         residual_squared += np.linalg.norm(data.iloc[:, column_index] - output) ** 2
     
     return residual_squared
 
 
-def fit_cortical() -> None:
+def fit_cortical(cortical_data) -> None:
     """
     Fit cortical data to αte^(-λt)
     """
 
-    # read cortical file; drop first row (column index) and reset row index
-    corticalflow_xls = pd.ExcelFile(config.CORTICALFLOW_PATH)
-    corticalflow = pd.read_excel(corticalflow_xls, "corticalflow")
-
     # process raw_data, absolute value negative cortical flow for fitting
-    corticalflow_right, corticalflow_left, time = DataProcessing.process_rawdf(corticalflow, "Time (s)")
+    (corticalflow_right, corticalflow_left, time) = cortical_data
     corticalflow_left = corticalflow_left.apply(lambda x: abs(x))
     
     # fit data using αte^(-λt)
@@ -58,8 +54,8 @@ def fit_cortical() -> None:
     alpha_l, lambda_l = fmin(fit_cortical_func, [1, 1], args=(time, corticalflow_left, CorticalFlowFit.LINEAR))
 
     # average angles
-    cortical_average_right = DataProcessing.column_average(corticalflow_right)
-    cortical_average_left = DataProcessing.column_average(corticalflow_left)
+    cortical_average_right = column_average(corticalflow_right)
+    cortical_average_left = column_average(corticalflow_left)
 
     # initialize figure and plot
     fig, (axLeft, axRight) = plt.subplots(1, 2)
@@ -67,8 +63,20 @@ def fit_cortical() -> None:
     axLeft.plot(time, np.multiply(alpha_l*time,np.e**(-lambda_l * time)))
     axRight.plot(time, cortical_average_right)
     axRight.plot(time, np.multiply(alpha_r*time,np.e**(-lambda_r * time)))
-    plt.savefig(config.PLOT_FIT_CORTICAL)
+    plt.savefig("cortical.png")
 
     # print average fit coefficients 
     print(alpha_r, lambda_r)
     print(alpha_l, lambda_l)
+
+
+def column_average(df: pd.DataFrame) -> np.ndarray:
+    """
+    return a column-wise average of a pandas dataframe
+    """
+    col_sum = 0
+    num_cols = len(df.columns)
+    for column in range(num_cols):
+        col_sum += df.iloc[:,column].to_numpy()
+    col_average = col_sum / num_cols
+    return col_average

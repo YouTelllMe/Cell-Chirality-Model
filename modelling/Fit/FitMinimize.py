@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy.optimize import fmin, minimize 
 from ..ModelAB import ModelAB
+from ..ModelExtendingSpring import ModelExtendingSpring
 from ..Simulator import Simulator
 
 def fit_fmin_model(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
@@ -27,7 +28,9 @@ def residual_squared(x: tuple[float, float, float],
     """
     # initial point not included within tau
     A, B = x
-    sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=A, B=B, t_final=195)
+    # sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=A, B=B, t_final=195)
+    sim = Simulator(ModelExtendingSpring, (0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0, -0.5, 0.5, 0), 
+            A=A, B=B, t_final=195, surfaces=[lambda x: (2*x[0]/3)**2 + x[1]**2 + x[2]**2 - 1])
     sim.run(False)
 
     dorsal_ABa = sim.angle["dorsal_ABa"].to_numpy()
@@ -51,8 +54,9 @@ def residual_squared(x: tuple[float, float, float],
 
     # makes distance 1
     residual_square += epsilon * ((np.sum(sim.distance["12"].to_numpy() - np.ones(40))) ** 2 +
-                                (np.sum(sim.distance["24"].to_numpy() - np.ones(40))) ** 2 +
+                                (np.sum(sim.distance["23"].to_numpy() - np.ones(40))) ** 2 +
                                 (np.sum(sim.distance["34"].to_numpy() - np.ones(40))) ** 2 +
-                                (np.sum(sim.distance["13"].to_numpy() - np.ones(40))) ** 2)
+                                (np.sum(sim.distance["14"].to_numpy() - np.ones(40))) ** 2)
+    
     print(residual_square)
     return residual_square

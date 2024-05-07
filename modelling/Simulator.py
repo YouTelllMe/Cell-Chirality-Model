@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.integrate import solve_ivp
+import time
 
 
 class Simulator:
@@ -12,7 +13,8 @@ class Simulator:
         self.fun = lambda t, y: model.get_velocity(t, y, 
                                                    A = kwargs['A'], 
                                                    B = kwargs['B'], 
-                                                   t_final = kwargs['t_final'])
+                                                   t_final = kwargs['t_final'],
+                                                   surfaces = kwargs['surfaces'])
 
         self.df = pd.DataFrame([])
         self.distance = pd.DataFrame([])
@@ -24,14 +26,16 @@ class Simulator:
 
         https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html#scipy.integrate.solve_ivp
         """
+        start = time.time()
         solver = solve_ivp(self.fun, 
                            [self.TAU_INITIAL, self.TAU_FINAL], 
                            self.y0, 
+                           method='RK23',
                            t_eval = np.linspace(self.TAU_INITIAL, self.TAU_FINAL, 40)
                            )
         
         if solver.status != 0:
-            raise(Exception("RK45 Solve Failed"))
+            raise(Exception("Solver Failed"))
         
 
         # solver.t to get the timestamps
@@ -44,6 +48,8 @@ class Simulator:
             self.df.to_excel('output.xlsx', index=False)
             self.distance.to_excel('distances.xlsx', index=False)
             self.angle.to_excel('angles.xlsx', index=False)
+        
+        print("Total(s):", time.time()-start, solver.nfev, solver.njev, solver.nlu)
                     
 
     def compute_distance(self):
@@ -62,6 +68,8 @@ class Simulator:
     def compute_angles(self):
         """
         arccos returns in range [0,pi]
+
+        Note, for the computation of angles, see data diagrams for reference.
         """
         if self.df.empty:
             raise(Exception("DataFrame not Found."))
@@ -77,20 +85,22 @@ class Simulator:
                                  "z": self.df['8']-self.df['11']})
         
         ABa['-x'] = -ABa['x']
-        ABp['-x'] = -ABp['x']
+        ABp['-y'] = -ABp['y']
 
         #dorsal view ; dorsal view is top down; (x,y), (-1,0) is 0 degrees. Use dot product rule to obtain. 
         #-ABa['-x'] because the axis should be position 2 - position 1
         self.angle['dorsal_ABa'] = np.arccos(-ABa['-x']/np.sqrt(ABa['x']**2 + ABa['y']**2)) * 180 / np.pi
-        self.angle['dorsal_ABp'] = np.arccos(-ABp['-x']/np.sqrt(ABp['x']**2 + ABp['y']**2)) * 180 / np.pi
+        self.angle['dorsal_ABp'] = np.arccos(-ABp['x']/np.sqrt(ABp['x']**2 + ABp['y']**2)) * 180 / np.pi
 
         #anterior view ; anterior view is from the front; (y,z), (1,0) is 0 degrees. Dot with (1,0)
         self.angle['anterior_ABa'] = np.arccos(ABa['y']/np.sqrt(ABa['y']**2 + ABa['z']**2)) * 180 / np.pi
-        self.angle['anterior_ABp'] = np.arccos(ABp['y']/np.sqrt(ABp['y']**2 + ABp['z']**2)) * 180 / np.pi
+        self.angle['anterior_ABp'] = np.arccos(ABp['-y']/np.sqrt(ABp['y']**2 + ABp['z']**2)) * 180 / np.pi
 
         # print(self.angle.head())
         for i in range(len(self.angle.index)):
+            # print(ABa.at[i,'z'])
             if ABa.at[i,'z'] < 0:
                 self.angle.at[i,'anterior_ABa'] *= -1
             if ABp.at[i,'z'] < 0:
-                self.angle.at[i,'anterior_ABa'] *= -1
+                self.angle.at[i,'anterior_ABp'] *= -1
+            

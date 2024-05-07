@@ -5,29 +5,25 @@ from scipy.stats import t
 from collections.abc import Sequence
 from ..Simulator import Simulator
 from ..ModelAB import ModelAB
+from ..ModelExtendingSpring import ModelExtendingSpring
 
 
 def fit_model_whole(raw_data):
     """
     """
 
-    (dorsal_anterior, 
-    dorsal_posterior, 
-    dorsal_t,
-    anterior_anterior, 
-    anterior_dorsal, 
-    anterior_t) = raw_data
+    (ABa_dorsal, ABp_dorsal, dorsal_t, ABa_ant, ABp_ant, anterior_t) = raw_data
 
     manual_distances = np.ones(160)
-    dorsal_anterior = dorsal_anterior.to_numpy().flatten("F")
-    dorsal_posterior = dorsal_posterior.to_numpy().flatten("F")
-    anterior_anterior = anterior_anterior.to_numpy().flatten("F")
-    anterior_dorsal = anterior_dorsal.to_numpy().flatten("F")
+    ABa_dorsal = ABa_dorsal.to_numpy().flatten("F")
+    ABp_dorsal = ABp_dorsal.to_numpy().flatten("F")
+    ABa_ant = ABa_ant.to_numpy().flatten("F")
+    ABp_ant = ABp_ant.to_numpy().flatten("F")
 
-    y_data = np.concatenate((dorsal_anterior, dorsal_posterior, anterior_anterior, anterior_dorsal, manual_distances))
+    y_data = np.concatenate((ABa_dorsal, ABp_dorsal, ABa_ant, ABp_ant, manual_distances))
     x_data = ()
 
-    popt, pcov = curve_fit(fit_model_curve, x_data, y_data, p0=(20,1))
+    popt, pcov = curve_fit(fit_model_curve, x_data, y_data, p0=(20,20))
 
     alpha = 0.05 # 95% confidence interval = 100*(1-alpha)
     n = len(y_data)    # number of data points
@@ -43,25 +39,27 @@ def fit_model_curve(x: Sequence[float], A: float, B: float):
     """
     """
     print(A, B)
-    sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=A, B=B, t_final=195)
+    # sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=A, B=B, t_final=195)
+    sim = Simulator(ModelExtendingSpring, (0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0, -0.5, 0.5, 0), 
+                A=A, B=B, t_final=195, surfaces=[lambda x: (2*x[0]/3)**2 + x[1]**2 + x[2]**2 - 1])
     sim.run(False)
 
-    dorsal_anterior = sim.angle["dorsal_ABa"]
-    dorsal_posterior = sim.angle["dorsal_ABp"]
-    anterior_anterior = sim.angle["anterior_ABa"]
-    anterior_dorsal = sim.angle["anterior_ABp"]
+    ABa_dorsal = sim.angle["dorsal_ABa"]
+    ABp_dorsal = sim.angle["dorsal_ABp"]
+    ABa_ant = sim.angle["anterior_ABa"]
+    ABp_ant = sim.angle["anterior_ABp"]
 
     
     computed_instance_N = []
-    for angle_type in (dorsal_anterior, dorsal_posterior, anterior_anterior, anterior_dorsal):
+    for angle_type in (ABa_dorsal, ABp_dorsal, ABa_ant, ABp_ant):
         for _ in range(10):
             computed_instance_N = np.concatenate((computed_instance_N, angle_type))
 
     computed_instance_N = np.concatenate((computed_instance_N, 
                                           sim.distance["12"],
-                                          sim.distance["13"],
-                                          sim.distance["24"],
-                                          sim.distance["34"]))
+                                          sim.distance["23"],
+                                          sim.distance["34"],
+                                          sim.distance["14"]))
     return computed_instance_N
 
 

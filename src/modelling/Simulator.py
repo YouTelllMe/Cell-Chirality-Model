@@ -30,7 +30,7 @@ class Simulator:
         solver = solve_ivp(self.fun, 
                            [self.TAU_INITIAL, self.TAU_FINAL], 
                            self.y0, 
-                           method='RK23',
+                           method='RK45',
                            t_eval = np.linspace(self.TAU_INITIAL, self.TAU_FINAL, 40)
                            )
         

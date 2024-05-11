@@ -32,6 +32,7 @@ class ModelExtendingSpring:
 
         cortical_flow_r = np.multiply(0.000345*t*kwargs['t_final'], np.e**(-0.012732*t*kwargs['t_final']))
         cortical_flow_l = np.multiply(0.00071*t*kwargs['t_final'], np.e**(-0.0166*t*kwargs['t_final']))
+        #avg 0.0005275, -0.014666
         ABal_prime = kwargs['t_final'] * (kwargs['B'] * ((dist12 - 1) * u12 + 
                                         (dist14 - 1) * u14) + 
                                 kwargs['A'] * cortical_flow_l * 

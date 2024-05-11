@@ -1,8 +1,4 @@
-import DataProcessing
-from models import model_AB
 import numpy as np
-from euler_method import euler
-import old.config as config
 from collections.abc import Sequence
 import pandas as pd
 import random 

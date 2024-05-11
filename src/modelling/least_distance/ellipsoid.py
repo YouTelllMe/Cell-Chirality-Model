@@ -1,5 +1,63 @@
 import numpy as np
 
+
+def min_point_ellpsoid(y: tuple[float, float, float], e0: float, e1: float) -> tuple[float, float, float]:
+    """
+    Finds distance from a point in R3 to an ellipsoid. Assumes the ellipsoid is 
+    a Prolate Spheriod where e0 > e1 = e2 for the ellipsoid with equation 
+        x0^2/e0^2 + (x1^2+x2^2)/e1^2 
+    https://www.geometrictools.com/Documentation/DistancePointEllipseEllipsoid.pdf
+
+
+    we let x = x0, y = x1, z = x2 since the x axis separates the anterior and posterior. 
+    change of variables r = sqrt(y1^2+y2^2)
+
+    requires e0 >= e1 > 0
+    """    
+
+    # on ellipse; return
+    if ((y[0]/e0)**2 + (y[0]/e1)**2 + (y[0]/e1)**2 - 1) == 0:
+        return np.array(y)
+
+    y0 = abs(y[0])
+    y1 = abs(y[1])
+    y2 = abs(y[2])
+
+    r = np.sqrt(y[1]**2+y[2]**2) #change of variables to 2 dimensional problem; we interpret the Prolate Spheriod as a 2D ellipse
+    sol = [0,0,0]
+
+    if r > 0:
+        if y0 > 0:
+            t_bar = get_ellipse_root(y0, r, e0, e1)
+            sol[0] = (e0**2)*y0 / (t_bar+e0**2)
+            radius = (e1**2)*r / (t_bar+e1**2)
+        else: #y0 == 0
+            radius = e1
+    else: # r == 0
+        if y0 < ((e0**2 - e1**2)/e0):
+            sol[0] = (e0**2)*y0/(e0**2-e1**2)
+            radius = e1*np.sqrt(1-(sol[0]/e0)**2) # the case where r = 0 and y0 = e0 is on the ellipse, so is covered already
+        else:
+            sol[0] = e0
+            return np.array(sol)
+
+    # find min (y1-x1)**2+(y2-x2)**2 such that (x1,x2) lie on a circle with rad r
+    min_r = radius * np.array([y1, y2]) / np.linalg.norm(np.array(y[1:2]))
+    sol[1] = min_r[0]
+    sol[2] = min_r[1]
+
+    # use symmetry to deduce signs
+    if y[0] < 0:
+        sol[0] *= -1
+    if y[1] < 0:
+        sol[1] *= -1
+    if y[2] < 0:
+        sol[2] *= -1
+
+    return np.array(sol)
+
+    
+
 def get_ellipse_root(y0, y1, e0, e1, maxit = 2000):
     """
     Root finding for ellipse using the Bisection Method. 
@@ -19,7 +77,7 @@ def get_ellipse_root(y0, y1, e0, e1, maxit = 2000):
     if (y0**2/e0**2 + y1**2/e1**2 - 1) < 0:
         s1 = 0
     else:
-        s1 = np.norm([n0, z1]) - 1 # t1 = -e1^2 + sqrt(e0^2y0^2+e1^2y1^2), s1 = -1 + sqrt(e0^2y0^2/e1+e1y1^2)
+        s1 = np.linalg.norm([n0, z1]) - 1 # t1 = -e1^2 + sqrt(e0^2y0^2+e1^2y1^2), s1 = -1 + sqrt(e0^2y0^2/e1+e1y1^2)
     s = 0
     
     iteration = 0
@@ -44,66 +102,25 @@ def get_ellipse_root(y0, y1, e0, e1, maxit = 2000):
         print("Warning, maximum iteration reaeched, result may be unreliable.")
     
     return s * (e1**2)
-
-
-def min_point_ellpsoid(y: tuple[float, float, float], e0: float, e1: float) -> tuple[float, float, float]:
-    """
-    Finds distance from a point in R3 to an ellipsoid. Assumes the ellipsoid is 
-    a Prolate Spheriod where e0 > e1 = e2 for the ellipsoid with equation 
-        x0^2/e0^2 + (x1^2+x2^2)/e1^2 
-    https://www.geometrictools.com/Documentation/DistancePointEllipseEllipsoid.pdf
-
-
-    we let x = x0, y = x1, z = x2 since the x axis separates the anterior and posterior. 
-    change of variables r = sqrt(y1^2+y2^2)
-
-    requires e0 >= e1 > 0
-    """    
-
-    # on ellipse; return
-    if ((y[0]/e0)**2 + (y[0]/e1)**2 + (y[0]/e1)**2 - 1) == 0:
-        return np.array(y)
-
-    y0 = abs(y[0])
-    y1 = abs(y[1])
-    y2 = abs(y[2])
-    r = np.sqrt(y[1]**2+y[2]**2) #change of variables to 2 dimensional problem; we interpret the Prolate Spheriod as a 2D ellipse
-    sol =  np.array([0,0,0])
-
-    if r > 0:
-        if y0 > 0:
-            t_bar = get_ellipse_root(y0, r, e0, e1)
-            sol[0] = (e0**2)*y0 / (t_bar+e0**2)
-            radius = (e1**2)*r / (t_bar+e1**2)
-        else: #y0 == 0
-            radius = e1
-    else: # r == 0
-        if y0 < ((e0**2 - e1**2)/e0):
-            sol[0] = (e0**2)*y0/(e0**2-e1**2)
-            radius = e1*np.sqrt(1-(sol[0]/e0)**2)
-        else:
-            sol[0] = e0
-            radius = 0
-
-    # find min norm (y1-x1)**2+(y2-x2)**2 such that norm of x1 and x2 is r
-    # (x1,x2) lie on a circle with rad r
-    sol[1] = np.sqrt(radius**2/(1+(y2/y1)**2))
-    sol[2] = (y2/y1) * sol[1]
-
-    # use symmetry to deduce signs
-    if y[0] < 0:
-        sol[0] *= -1
-    if y[1] < 0:
-        sol[1] *= -1
-    if y[2] < 0:
-        sol[2] *= -1
-
-    return sol
-
-    
             
 
 
 
+if __name__ == "__main__":
+
+    #testing
+    print(min_point_ellpsoid((0,0,0), 1, 1))
+    print(min_point_ellpsoid((1,0,0), 3/2, 1))
+    print(min_point_ellpsoid((-1,-5,-3), 1, 1))
+    print(min_point_ellpsoid((-1,-5,-3), 3/2, 1))
+    print(min_point_ellpsoid((-1,3,9), 3/2, 1))
+    # print(min_point_ellpsoid((0.1,0.1,0.1), 3/2, 1))
+    # print(min_point_ellpsoid((-0.1,0.1,0.1), 3/2, 1))
+    # print(min_point_ellpsoid((0.1,-0.1,0.1), 3/2, 1))
+    # print(min_point_ellpsoid((0.1,0.1,-0.1), 3/2, 1))
+    # print(min_point_ellpsoid((-0.1,-0.1,0.1), 3/2, 1))
+    # print(min_point_ellpsoid((-0.1,0.1,-0.1), 3/2, 1))
+    # print(min_point_ellpsoid((0.1,-0.1,-0.1), 3/2, 1))
+    # print(min_point_ellpsoid((-0.1,-0.1,-0.1), 3/2, 1))
 
 

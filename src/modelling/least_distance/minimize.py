@@ -30,6 +30,7 @@ def find_min(x, surface):
         res = find_min(x0, surface)
         print(res.x)
     """
+    x = np.array(x)
     cons = {'type': 'eq', 'fun': surface}
     return minimize(distance, x, args=(x), constraints=cons)
 

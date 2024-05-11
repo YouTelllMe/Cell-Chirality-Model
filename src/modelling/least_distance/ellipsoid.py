@@ -1,4 +1,6 @@
 import numpy as np
+import minimize
+import time
 
 
 def min_point_ellpsoid(y: tuple[float, float, float], e0: float, e1: float) -> tuple[float, float, float]:
@@ -42,9 +44,9 @@ def min_point_ellpsoid(y: tuple[float, float, float], e0: float, e1: float) -> t
             return np.array(sol)
 
     # find min (y1-x1)**2+(y2-x2)**2 such that (x1,x2) lie on a circle with rad r
-    min_r = radius * np.array([y1, y2]) / np.linalg.norm(np.array(y[1:2]))
-    sol[1] = min_r[0]
-    sol[2] = min_r[1]
+    min_circle_p = radius * np.array([y1, y2]) / np.linalg.norm([y1, y2])
+    sol[1] = min_circle_p[0]
+    sol[2] = min_circle_p[1]
 
     # use symmetry to deduce signs
     if y[0] < 0:
@@ -108,19 +110,27 @@ def get_ellipse_root(y0, y1, e0, e1, maxit = 2000):
 
 if __name__ == "__main__":
 
+
+    surface = lambda x: (2*x[0]/3)**2 + x[1]**2 + x[2]**2 - 1
     #testing
-    print(min_point_ellpsoid((0,0,0), 1, 1))
-    print(min_point_ellpsoid((1,0,0), 3/2, 1))
-    print(min_point_ellpsoid((-1,-5,-3), 1, 1))
-    print(min_point_ellpsoid((-1,-5,-3), 3/2, 1))
-    print(min_point_ellpsoid((-1,3,9), 3/2, 1))
-    # print(min_point_ellpsoid((0.1,0.1,0.1), 3/2, 1))
-    # print(min_point_ellpsoid((-0.1,0.1,0.1), 3/2, 1))
-    # print(min_point_ellpsoid((0.1,-0.1,0.1), 3/2, 1))
-    # print(min_point_ellpsoid((0.1,0.1,-0.1), 3/2, 1))
-    # print(min_point_ellpsoid((-0.1,-0.1,0.1), 3/2, 1))
-    # print(min_point_ellpsoid((-0.1,0.1,-0.1), 3/2, 1))
-    # print(min_point_ellpsoid((0.1,-0.1,-0.1), 3/2, 1))
-    # print(min_point_ellpsoid((-0.1,-0.1,-0.1), 3/2, 1))
+    print(min_point_ellpsoid((1,0,0), 3/2, 1), minimize.find_min((1,0,0), surface).x)
+    print(min_point_ellpsoid((-1,-5,-3), 3/2, 1),  minimize.find_min((-1,-5,-3), surface).x) 
+    print(min_point_ellpsoid((-1,3,9), 3/2, 1), minimize.find_min((-1,3,9), surface).x) 
+
+
+    # start = time.time()
+    # for _ in range(1000):
+    #     min_point_ellpsoid((-1,-5,-3), 3/2, 1)
+    # print(time.time()-start)
+    
+
+    print(min_point_ellpsoid((0.1,0.1,0.1), 3/2, 1), minimize.find_min((0.1,0.1,0.1), surface).x)
+    print(min_point_ellpsoid((-0.1,0.1,0.1), 3/2, 1), minimize.find_min((-0.1,0.1,0.1), surface).x)
+    print(min_point_ellpsoid((0.1,-0.1,0.1), 3/2, 1), minimize.find_min((0.1,-0.1,0.1), surface).x)
+    print(min_point_ellpsoid((0.1,0.1,-0.1), 3/2, 1), minimize.find_min((0.1,0.1,-0.1), surface).x)
+    print(min_point_ellpsoid((-0.1,-0.1,0.1), 3/2, 1), minimize.find_min((-0.1,-0.1,0.1), surface).x)
+    print(min_point_ellpsoid((-0.1,0.1,-0.1), 3/2, 1), minimize.find_min((-0.1,0.1,-0.1), surface).x)
+    print(min_point_ellpsoid((0.1,-0.1,-0.1), 3/2, 1), minimize.find_min((0.1,-0.1,-0.1), surface).x)
+    print(min_point_ellpsoid((-0.1,-0.1,-0.1), 3/2, 1), minimize.find_min((-0.1,-0.1,-0.1), surface).x)
 
 

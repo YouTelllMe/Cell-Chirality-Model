@@ -1,5 +1,5 @@
 import numpy as np
-import minimize
+from . import minimize
 import time
 
 

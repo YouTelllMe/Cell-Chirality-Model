@@ -1,6 +1,6 @@
 from modelling.Simulator import Simulator
 from modelling.ModelAB import ModelAB
-from modelling.ModelExtendingSpring import ModelExtendingSpring
+from modelling import ModelExtendingSpring
 from plot.Animator import Animator
 from helpers import get_data, get_cortical_data
 from modelling.Fit.FitCurveFit import fit_model_whole
@@ -38,19 +38,17 @@ notes:
 """
 
 def fit():
-    "FIT; SURFACES = [lambda x: (2*x[0]/3)**2 + x[1]**2 + x[2]**2 - 1]"
-    print(fit_fmin_model(get_data()))
-    # print(fit_model_whole(get_data()))
+    "FIT; make sure to customize the model in the fit functions"
+    # print(fit_fmin_model(get_data()))
+    print(fit_model_whole(get_data()))
+
 
 
 def run():
     "RUN, SAVE, AND ANIMATE"
-    sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=0.12868516070638591, B=1.0814748125814821, t_final=195,
-                    surfaces=None)
-    # A=0.12718164, B=0.06594284
-    # A=0.12868516070638591, B=1.0814748125814821
-    # sim = Simulator(ModelExtendingSpring, (0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0, -0.5, 0.5, 0), 
-    #                 A=0.01, B=1, t_final=195, surfaces=[lambda x: (2*x[0]/3)**2 + x[1]**2 + x[2]**2 - 1])
+    # sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=0.12868516070638591, B=1.0814748125814821, t_final=195,
+    #                 surfaces=None)
+    sim = Simulator(ModelExtendingSpring.get_velocity(1.09983719, 9.77537419, 195), (0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0, -0.5, 0.5, 0))
     sim.run(True)
     animator = Animator(sim.df)
     animator.animate()

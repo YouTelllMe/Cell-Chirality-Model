@@ -6,16 +6,11 @@ import time
 
 class Simulator:
 
-    def __init__(self, model, y0, **kwargs) -> None:
+    def __init__(self, model_func, y0, **kwargs) -> None:
         self.y0 = y0
         self.TAU_INITIAL = 0
         self.TAU_FINAL = 1 # non-dimensionalized
-        self.fun = lambda t, y: model.get_velocity(t, y, 
-                                                   A = kwargs['A'], 
-                                                   B = kwargs['B'], 
-                                                   t_final = kwargs['t_final'],
-                                                   surfaces = kwargs['surfaces'])
-
+        self.fun = model_func
         self.df = pd.DataFrame([])
         self.distance = pd.DataFrame([])
         self.angle = pd.DataFrame([])
@@ -30,7 +25,8 @@ class Simulator:
         solver = solve_ivp(self.fun, 
                            [self.TAU_INITIAL, self.TAU_FINAL], 
                            self.y0, 
-                           method='RK23',
+                        #    method='RK23',
+                           method='RK45',
                            t_eval = np.linspace(self.TAU_INITIAL, self.TAU_FINAL, 40)
                            )
         
@@ -103,4 +99,4 @@ class Simulator:
                 self.angle.at[i,'ABa_anterior'] *= -1
             if ABp.at[i,'z'] < 0:
                 self.angle.at[i,'ABp_anterior'] *= -1
-            
+        

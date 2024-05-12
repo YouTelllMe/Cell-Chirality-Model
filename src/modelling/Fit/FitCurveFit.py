@@ -4,8 +4,8 @@ from scipy.optimize import curve_fit
 from scipy.stats import t
 from collections.abc import Sequence
 from ..Simulator import Simulator
-from ..ModelAB import ModelAB
-from ..ModelExtendingSpring import ModelExtendingSpring
+from .. import ModelAB
+from .. import ModelExtendingSpring
 
 
 def fit_model_whole(raw_data):
@@ -39,10 +39,9 @@ def fit_model_curve(x: Sequence[float], A: float, B: float):
     """
     """
     print(A, B)
-    sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=A, B=B, t_final=195,
-                    surfaces=None)
-    # sim = Simulator(ModelExtendingSpring, (0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0, -0.5, 0.5, 0), 
-    #             A=A, B=B, t_final=195, surfaces=[lambda x: (2*x[0]/3)**2 + x[1]**2 + x[2]**2 - 1])
+    # sim = Simulator(ModelAB.get_velocity(A, B, 195), (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=A, B=B, t_final=195,
+    #                 surfaces=None)
+    sim = Simulator(ModelExtendingSpring.get_velocity(A, B, 195), (0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0, -0.5, 0.5, 0))
     sim.run(False)
 
     ABa_dorsal = sim.angle["ABa_dorsal"]

@@ -1,7 +1,5 @@
 import numpy as np
 from matplotlib.animation import FuncAnimation
-from matplotlib.figure import Figure
-from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
 import pandas as pd
 

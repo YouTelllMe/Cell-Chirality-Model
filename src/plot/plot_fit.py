@@ -10,12 +10,12 @@ def plot_fit(data, angles):
     """
     (ABa_dorsal, ABp_dorsal, dorsal_t, ABa_ant, ABp_ant, anterior_t) = data
     
-    # average angles for plotting
     da_average = column_average(ABa_dorsal)
     dp_average = column_average(ABp_dorsal)
     aa_average = column_average(ABa_ant)
     ap_average = column_average(ABp_ant)
 
+    #TODO?
     # get standard error of the mean
     da_std = ABa_dorsal.std(axis=1).to_numpy() / np.sqrt(40)
     dp_std = ABp_dorsal.std(axis=1).to_numpy() / np.sqrt(40)
@@ -37,12 +37,13 @@ def plot_fit(data, angles):
     dorsal_t_test = []
     anterior_t_test = []
 
+    #check
     for row_index in range(10):
+        #TODO: is this right? 
         dorsal_row_t_test = t_test(da_np[row_index], dp_np[row_index])
         anterior_row_t_test = t_test(aa_np[row_index], ap_np[row_index])
         dorsal_t_test.append(dorsal_row_t_test.pvalue >= 0.95)
         anterior_t_test.append(anterior_row_t_test.pvalue >= 0.95)
-
     dorsal_t_ntest = ~np.array(dorsal_t_test)
     anterior_t_ntest = ~np.array(anterior_t_test)
 
@@ -53,6 +54,7 @@ def plot_fit(data, angles):
     axD.title.set_text("Dorsal View")
     axA.title.set_text("Anterior View")
 
+    #TODO
     dorsal_t_passed = list(itertools.compress(dorsal_t, dorsal_t_test))
     dorsal_t_npassed = list(itertools.compress(dorsal_t, dorsal_t_ntest))
     anterior_t_passed = list(itertools.compress(anterior_t, anterior_t_test))
@@ -69,21 +71,21 @@ def plot_fit(data, angles):
     ap_average_npassed = list(itertools.compress(ap_average, anterior_t_ntest))
 
     # plot data
-    axD.plot(dorsal_t, computed_ABa_dorsal, label="dorsal anterior model", markersize=2, color="blue")
-    axD.plot(dorsal_t_passed, da_average_passed, "o", label="dorsal anterior data - passed", markersize=4, color="blue")
-    axD.plot(dorsal_t_npassed, da_average_npassed, "o", label="dorsal anterior data", markersize=4, color='none', markeredgecolor="blue")
+    axD.plot(dorsal_t, computed_ABa_dorsal, label="ABa_dorsal model", markersize=2, color="blue")
+    axD.plot(dorsal_t_passed, da_average_passed, "o", label="ABa_dorsal data - passed", markersize=4, color="blue")
+    axD.plot(dorsal_t_npassed, da_average_npassed, "o", label="ABa_dorsal data", markersize=4, color='none', markeredgecolor="blue")
 
-    axD.plot(dorsal_t, computed_ABp_dorsal, label="dorsal posterior model", markersize=2, color="red")
-    axD.plot(dorsal_t_passed, dp_average_passed, "o", label="dorsal posterior data - passed", markersize=4, color="red")
-    axD.plot(dorsal_t_npassed, dp_average_npassed, "o", label="dorsal posterior data", markersize=4, color='none', markeredgecolor="red")
+    axD.plot(dorsal_t, computed_ABp_dorsal, label="ABp_dorsal model", markersize=2, color="red")
+    axD.plot(dorsal_t_passed, dp_average_passed, "o", label="ABp_dorsal data - passed", markersize=4, color="red")
+    axD.plot(dorsal_t_npassed, dp_average_npassed, "o", label="ABp_dorsal data", markersize=4, color='none', markeredgecolor="red")
 
-    axA.plot(anterior_t, computed_ABa_ant, label="anterior anterior model", markersize=2, color="blue")
-    axA.plot(anterior_t_passed, aa_average_passed, "o", label="anterior anterior data - passed", markersize=4, color="blue")
-    axA.plot(anterior_t_npassed, aa_average_npassed, "o", label="anterior anterior data", markersize=4, color='none', markeredgecolor="blue")
+    axA.plot(anterior_t, computed_ABa_ant, label="ABa_ant model", markersize=2, color="blue")
+    axA.plot(anterior_t_passed, aa_average_passed, "o", label="ABa_ant data - passed", markersize=4, color="blue")
+    axA.plot(anterior_t_npassed, aa_average_npassed, "o", label="ABa_ant data", markersize=4, color='none', markeredgecolor="blue")
 
-    axA.plot(anterior_t, computed_ABp_ant, label="anterior posterior model", markersize=2, color="red")
-    axA.plot(anterior_t_passed, ap_average_passed, "o", label="anterior posterior data - passed", markersize=4, color="red")
-    axA.plot(anterior_t_npassed, ap_average_npassed, "o", label="anterior posterior data", markersize=4, color='none', markeredgecolor="red")
+    axA.plot(anterior_t, computed_ABp_ant, label="ABp_ant model", markersize=2, color="red")
+    axA.plot(anterior_t_passed, ap_average_passed, "o", label="ABp_ant data - passed", markersize=4, color="red")
+    axA.plot(anterior_t_npassed, ap_average_npassed, "o", label="ABp_ant data", markersize=4, color='none', markeredgecolor="red")
 
 
     # plot confidence bands
@@ -111,6 +113,7 @@ def column_average(df: pd.DataFrame) -> np.ndarray:
     return col_average
 
 
+#TODO
 def t_test(sample1: np.ndarray, sample2: np.ndarray):
     """
     Performs the t_test on two data samples for the null hypothesis that 2 independent samples

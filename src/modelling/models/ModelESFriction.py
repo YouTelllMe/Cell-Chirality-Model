@@ -2,7 +2,7 @@ import time
 import numpy as np
 
 from ..least_distance.ellipsoid import min_point_ellpsoid
-from .model_config import T_FINAL, P2
+from .model_config import T_FINAL, E0, E1
 
 def get_velocity(A, B):
 
@@ -73,11 +73,10 @@ def get_velocity(A, B):
                 ABar_prime += T_FINAL * B * (dist24 - 1) * u24
                 ABpl_prime += T_FINAL * B * (dist24 - 1) * -u24
 
-        e0, e1 = (3/2, 1)
-        min_vector_ABal = min_point_ellpsoid(ABal, e0, e1) - ABal
-        min_vector_ABar = min_point_ellpsoid(ABar, e0, e1) - ABar
-        min_vector_ABpr = min_point_ellpsoid(ABpr, e0, e1) - ABpr
-        min_vector_ABpl = min_point_ellpsoid(ABpl, e0, e1) - ABpl
+        min_vector_ABal = min_point_ellpsoid(ABal, E0, E1) - ABal
+        min_vector_ABar = min_point_ellpsoid(ABar, E0, E1) - ABar
+        min_vector_ABpr = min_point_ellpsoid(ABpr, E0, E1) - ABpr
+        min_vector_ABpl = min_point_ellpsoid(ABpl, E0, E1) - ABpl
 
         min_dist_ABal = np.linalg.norm(min_vector_ABal)
         min_dist_ABar = np.linalg.norm(min_vector_ABar)

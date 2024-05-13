@@ -10,3 +10,6 @@ old/
 4-cell/
 *.csv
 *.png
+*.xlsx
+utils.py
+results/

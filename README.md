@@ -1,35 +1,46 @@
-# Cell-Chirality-Visualization
+# Cell-Chirality-Simulation
 
 Python Implementation of Cell Chirality Spring Model in early embryonic development of C. Elegans.
 
-Notes: https://www.overleaf.com/read/xqqjsrdqwkcj
+Notes: https://www.overleaf.com/read/xqqjsrdqwkcj these set of notes contains the equation construction of the basic constant spring model, which is used to derive all further models.
 
-## TO-DO
+## Current Models
 
-1. Angle data doesn't have to be computed DURING euler steps, can decouple that process
-2. Fix naming for Dorsal1, Dorsal Anterior...
-3. Make sure the friction vector directions are correct. Something suspicious about the EMS friction.
+The following are the models that are fitted. Any model with p2 considers the p2 cell, and the dash after denotes where the p2 cell is fixed (0 degrees, 30 degrees, 45 degrees...). The Constant Spring models have springs with constant rest lengths, which the Extending Spring models have variable spring lengths that scale to 1.5 of the original rest length by the end of the experiment. The Extending Spring models also consider an ellpsoid eggshell that pushes back when the cells get too close. The all prefix distinguishes between models where all springs expand verses models where only the springs between the cells undergoing mitosis expands.
 
-## Note
+CS (constant spring) Models:
 
-- Cell 1 = Abar, Cell 2 = Abpr, Cell 3 = Abal, Cell 4 = Abpl
-- positive z = top, positive x = posterior, positive y = right, right side spinning towards anterior?
+1. AB
+2. ABp2-0, ABp2-30, ABp2-45
 
-## Labelled Visualizations
+ES (extending spring) Models:
 
-![XYZ dot](https://github.com/YouTelllMe/Cell-Chirality-Visualization/assets/80024712/c04e09c8-4c7a-4fc0-aea3-db9a91236e96)
-![XYZ dotted dot](https://github.com/YouTelllMe/Cell-Chirality-Visualization/assets/80024712/b48528ae-a8fc-4ed8-ba21-b55ff90956fa)
+1. ES, allES
+2. ESp2-0, ESp2-30, ESp2-45
+3. allESp2-0, allESp2-30, allESp2-45
 
-## Side Visualizations
+So far, ESp2-45(A=0.1355238,B=0.02709549) and ABp2-45(A=0.1355238,B=0.02709549) have been the most promising candidates. Their fit and plots are included in the "Model Fit" section below.
 
-### Bird Eye view
+## Further Models
 
-![XY](https://github.com/YouTelllMe/Cell-Chirality-Visualization/assets/80024712/e1533dec-c6f1-4bd6-9fc6-19cc348f04a1)
+Further model candidates include:
 
-### Y-side view
+- on / off friction: a variable of current models where the friction is only activated when the cells are in contact with an object of interest
+- p2 wall: p2 cell is currently modelled as a cell fixed in space that is not spinning. Another possible set of models model the p2 as a wall
+- fit pushback: currently, the force with which the egg shell of Extended Spring models push back is modelled as a linear spring force that shares a spring constant with the intracell springs. A possible path to explore would be to let this linear force be a 3rd parameter to fit.
 
-![YZ](https://github.com/YouTelllMe/Cell-Chirality-Visualization/assets/80024712/da8e7076-008c-4efd-973e-b787f615fc21)
+## Important Design Decisions
 
-### X-side view
+This section goes over important notes about the code base and design decisions that should be revisited and perhaps reconsidered.
 
-![XZ](https://github.com/YouTelllMe/Cell-Chirality-Visualization/assets/80024712/a0253db6-d769-45df-a760-1fa1282148ef)
+- models use RK45 to resolve ODE, and the default fitting alg for scipy.curve_fit
+- all models have diagonal springs that activate conditionally
+- the ABp cells have a spring with the p2 cell. For ES models, even though the springs expand, this spring with the p2 cell is fixed.
+- all ES models retain the spring between cells and the "EMS" (z=-0.5 plane). This makes the model a more complex but improves the dorsal fit
+- egg shell is tight (e0=3/2 or 2, e1 = 1)
+- the residuals of extended spring models still tries to keep the distance between all adjancent cells as 1
+- the models themselves have the directions worked out and only requires that the parameters be the suitable magnitudes. Thus, the fit for parameters is bounded to be >= 0
+- the initial parameter guess is a vector of all 0s
+- the data is actually not great
+
+## Model Fit

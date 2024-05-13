@@ -9,7 +9,7 @@ old/
 2-cell/
 4-cell/
 *.csv
-*.png
+src/*.png
 *.xlsx
 utils.py
 results/

@@ -29,9 +29,6 @@ def get_velocity(A, B):
         u23 = (ABpr-ABar) / dist23 # 3-2
         u24 = (ABpl-ABar) / dist24 # 4-2
         u34 = (ABpl-ABpr) / dist34 # 4-3
-        u3p2 = (P2 - ABpr) / np.linalg.norm(P2 - ABpr)
-        u4p2 = (P2 - ABpl) /  np.linalg.norm(P2 - ABpl)
-        k_hat = np.array([0,0,1])
 
 
         cortical_flow_r = 0.000345*t*T_FINAL*np.e**(-0.012732*t*T_FINAL)
@@ -45,23 +42,23 @@ def get_velocity(A, B):
         cortical_int *= cortical_int_scale
 
         ABal_prime = T_FINAL * (B * ((dist12 - (1 + cortical_int)) * u12 + 
-                                        (dist14 - (1 + cortical_int)) * u14) + 
+                                        (dist14 - 1) * u14) + 
                                 A * cortical_flow_l * 
                                         (np.cross(-u14, -u34) - 
                                         np.cross(u14, u12)))
         ABar_prime = T_FINAL * (B * ((dist12 - (1 + cortical_int)) * -u12 + 
-                                        (dist23 - (1 + cortical_int)) * u23) + 
+                                        (dist23 - 1) * u23) + 
                                 A * cortical_flow_r * 
                                         (np.cross(-u23, u34) -
                                         np.cross(u23, -u12)))
 
-        ABpr_prime = T_FINAL * (B * ((dist23 - (1 + cortical_int)) * -u23 + 
+        ABpr_prime = T_FINAL * (B * ((dist23 - 1) * -u23 + 
                                         (dist34 - (1 + cortical_int)) * u34) + 
                                 A * cortical_flow_r * 
                                         (np.cross(u23, -u12) -
                                         np.cross(-u23, u34)))
 
-        ABpl_prime = T_FINAL * (B * ((dist14 - (1 + cortical_int)) * -u14 +
+        ABpl_prime = T_FINAL * (B * ((dist14 - 1) * -u14 +
                                         (dist34 - (1 + cortical_int)) * -u34) + 
                                 A * cortical_flow_l * 
                                         (np.cross(u14, u12) -
@@ -77,10 +74,10 @@ def get_velocity(A, B):
                 ABpl_prime += T_FINAL * B * (dist24 - 1) * -u24
 
         e0, e1 = (3/2, 1)
-        min_vector_ABal = ABal - min_point_ellpsoid(ABal, e0, e1)
-        min_vector_ABar = ABar - min_point_ellpsoid(ABar, e0, e1)
-        min_vector_ABpr = ABpr - min_point_ellpsoid(ABpr, e0, e1)
-        min_vector_ABpl = ABpl - min_point_ellpsoid(ABpl, e0, e1)
+        min_vector_ABal = min_point_ellpsoid(ABal, e0, e1) - ABal
+        min_vector_ABar = min_point_ellpsoid(ABar, e0, e1) - ABar
+        min_vector_ABpr = min_point_ellpsoid(ABpr, e0, e1) - ABpr
+        min_vector_ABpl = min_point_ellpsoid(ABpl, e0, e1) - ABpl
 
         min_dist_ABal = np.linalg.norm(min_vector_ABal)
         min_dist_ABar = np.linalg.norm(min_vector_ABar)
@@ -93,10 +90,10 @@ def get_velocity(A, B):
         min_u_ABpl = min_vector_ABpl/min_dist_ABpl
 
         # cell wall linear forces 
-        ABal_prime += T_FINAL * B * _cell_wall_step_simplified(min_vector_ABal, min_dist_ABal)
-        ABar_prime += T_FINAL * B * _cell_wall_step_simplified(min_vector_ABar, min_dist_ABar)
-        ABpr_prime += T_FINAL * B * _cell_wall_step_simplified(min_vector_ABpr, min_dist_ABpr)
-        ABpl_prime += T_FINAL * B * _cell_wall_step_simplified(min_vector_ABpl, min_dist_ABpl)
+        ABal_prime += T_FINAL * B * _cell_wall_step_simplified(-min_vector_ABal, min_dist_ABal)
+        ABar_prime += T_FINAL * B * _cell_wall_step_simplified(-min_vector_ABar, min_dist_ABar)
+        ABpr_prime += T_FINAL * B * _cell_wall_step_simplified(-min_vector_ABpr, min_dist_ABpr)
+        ABpl_prime += T_FINAL * B * _cell_wall_step_simplified(-min_vector_ABpl, min_dist_ABpl)
 
         # cell wall friction
         ABal_prime += T_FINAL * A * cortical_flow_l * np.cross(u12, min_u_ABal)

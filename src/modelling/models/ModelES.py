@@ -43,26 +43,26 @@ def get_velocity(A, B):
         cortical_int *= cortical_int_scale
 
         ABal_prime = T_FINAL * (B * ((dist12 - (1 + cortical_int)) * u12 + 
-                                        (dist14 - (1 + cortical_int)) * u14) + 
+                                        (dist14 - 1) * u14) + 
                                 A * cortical_flow_l * 
                                         (np.cross(-u14, -u34) - 
                                         np.cross(u14, u12) -
                                         np.cross(u12, k_hat)))
         ABar_prime = T_FINAL * (B * ((dist12 - (1 + cortical_int)) * -u12 + 
-                                        (dist23 - (1 + cortical_int)) * u23) + 
+                                        (dist23 - 1) * u23) + 
                                 A * cortical_flow_r * 
                                         (np.cross(-u23, u34) -
                                         np.cross(u23, -u12) -
                                         np.cross(-u12, k_hat)))
 
-        ABpr_prime = T_FINAL * (B * ((dist23 - (1 + cortical_int)) * -u23 + 
+        ABpr_prime = T_FINAL * (B * ((dist23 - 1) * -u23 + 
                                         (dist34 - (1 + cortical_int)) * u34) + 
                                 A * cortical_flow_r * 
                                         (np.cross(u23, -u12) -
                                         np.cross(-u23, u34) -
                                         np.cross(u34, k_hat)))
 
-        ABpl_prime = T_FINAL * (B * ((dist14 - (1 + cortical_int)) * -u14 +
+        ABpl_prime = T_FINAL * (B * ((dist14 - 1) * -u14 +
                                         (dist34 - (1 + cortical_int)) * -u34) + 
                                 A * cortical_flow_l * 
                                         (np.cross(u14, u12) -
@@ -102,8 +102,8 @@ def _cell_wall_step(pos):
         min_point = min_point_ellpsoid(pos, e0, e1)
         distance = np.linalg.norm(min_point-pos)
         if distance < 0.5:  
-                # return np.array((0.5-distance)*(pos-min_point)/distance) # linear
+                return np.array((0.5-distance)*(pos-min_point)/distance) # linear
                 # return np.array(((0.5/distance)**12 - (0.5/distance)**6)*(pos-min_point)/distance) # van der waals
-                return np.array((1/distance-2)*(pos-min_point)/distance) # exponential force
+                # return np.array((1/distance-2)*(pos-min_point)/distance) # exponential force
         else: 
                 return np.zeros(len(pos))

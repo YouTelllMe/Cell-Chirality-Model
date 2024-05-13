@@ -20,6 +20,8 @@ def get_velocity(A, B):
         dist23 = np.linalg.norm(ABar-ABpr)
         dist24 = np.linalg.norm(ABar-ABpl)
         dist34 = np.linalg.norm(ABpr-ABpl)
+        dist3p2 = np.linalg.norm(P2 - ABpr)
+        dist4p2 = np.linalg.norm(P2 - ABpl)
 
         u12 = (ABar-ABal) / dist12 # 2-1 
         u13 = (ABpr-ABal) / dist13 # 3-1 
@@ -27,8 +29,8 @@ def get_velocity(A, B):
         u23 = (ABpr-ABar) / dist23 # 3-2
         u24 = (ABpl-ABar) / dist24 # 4-2
         u34 = (ABpl-ABpr) / dist34 # 4-3
-        u3p2 = (P2 - ABpr) / np.linalg.norm(P2 - ABpr)
-        u4p2 = (P2 - ABpl) /  np.linalg.norm(P2 - ABpl)
+        u3p2 = (P2 - ABpr) / dist3p2 #p2-3
+        u4p2 = (P2 - ABpl) / dist4p2 #p2-4
         k_hat = np.array([0,0,1])
 
         cortical_flow_r = np.multiply(0.000345*t*T_FINAL, np.e**(-0.012732*t*T_FINAL))
@@ -50,7 +52,9 @@ def get_velocity(A, B):
 
         ABpr_prime = T_FINAL * (B * ((dist23 - 1) * -u23 + 
                                         (dist34 - 1) * u34 - 
-                                        ABpr[2] * k_hat) + 
+                                        ABpr[2] * k_hat +
+                                        (dist3p2 - 1) * u3p2
+                                        ) + 
                                 A * cortical_flow_r * 
                                         (np.cross(u23, -u12) -
                                         np.cross(-u23, u34) -
@@ -60,7 +64,8 @@ def get_velocity(A, B):
 
         ABpl_prime = T_FINAL * (B * ((dist14 - 1) * -u14 +
                                         (dist34 - 1) * -u34 - 
-                                        ABpl[2] * k_hat) + 
+                                        ABpl[2] * k_hat + 
+                                        (dist4p2 - 1) * u4p2) + 
                                 A * cortical_flow_l * 
                                         (np.cross(u14, u12) -
                                         np.cross(-u14, -u34) -

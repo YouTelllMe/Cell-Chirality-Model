@@ -1,9 +1,8 @@
 import time
 import numpy as np
 
-from ..least_distance.minimize import find_min
 from ..least_distance.ellipsoid import min_point_ellpsoid
-from .model_config import T_FINAL
+from .model_config import T_FINAL, P2
 
 def get_velocity(A, B):
 
@@ -30,11 +29,13 @@ def get_velocity(A, B):
         u23 = (ABpr-ABar) / dist23 # 3-2
         u24 = (ABpl-ABar) / dist24 # 4-2
         u34 = (ABpl-ABpr) / dist34 # 4-3
+        u3p2 = (P2 - ABpr) / np.linalg.norm(P2 - ABpr)
+        u4p2 = (P2 - ABpl) /  np.linalg.norm(P2 - ABpl)
         k_hat = np.array([0,0,1])
+
 
         cortical_flow_r = 0.000345*t*T_FINAL*np.e**(-0.012732*t*T_FINAL)
         cortical_flow_l = 0.00071*t*T_FINAL*np.e**(-0.0166*t*T_FINAL)
-        
 
         # avg of two cortical flows
         a = 0.0005275 
@@ -61,14 +62,18 @@ def get_velocity(A, B):
                                 A * cortical_flow_r * 
                                         (np.cross(u23, -u12) -
                                         np.cross(-u23, u34) -
-                                        np.cross(u34, k_hat)))
+                                        np.cross(u34, k_hat) - 
+                                        np.cross(u3p2, u34))
+                                )
 
         ABpl_prime = T_FINAL * (B * ((dist14 - (1 + cortical_int)) * -u14 +
                                         (dist34 - (1 + cortical_int)) * -u34) + 
                                 A * cortical_flow_l * 
                                         (np.cross(u14, u12) -
                                         np.cross(-u14, -u34) -
-                                        np.cross(-u34, k_hat)))
+                                        np.cross(-u34, k_hat) - 
+                                        np.cross(u4p2, -u34))
+                                )
         
         # applies spring force across cells in next iteration
         if dist13 <= 1:

@@ -3,7 +3,7 @@ from . import minimize
 import time
 
 
-def min_point_ellpsoid(y: tuple[float, float, float], e0: float, e1: float) -> tuple[float, float, float]:
+def min_point_ellpsoid(y: tuple[float, float, float], e0: float, e1: float) -> np.ndarray:
     """
     Finds distance from a point in R3 to an ellipsoid. Assumes the ellipsoid is 
     a Prolate Spheriod where e0 > e1 = e2 for the ellipsoid with equation 

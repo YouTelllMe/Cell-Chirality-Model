@@ -1,5 +1,5 @@
 import numpy as np
-from .model_config import T_FINAL
+from .model_config import T_FINAL, P2
 
 def get_velocity(A, B):
 
@@ -27,6 +27,8 @@ def get_velocity(A, B):
         u23 = (ABpr-ABar) / dist23 # 3-2
         u24 = (ABpl-ABar) / dist24 # 4-2
         u34 = (ABpl-ABpr) / dist34 # 4-3
+        u3p2 = (P2 - ABpr) / np.linalg.norm(P2 - ABpr)
+        u4p2 = (P2 - ABpl) /  np.linalg.norm(P2 - ABpl)
         k_hat = np.array([0,0,1])
 
         cortical_flow_r = np.multiply(0.000345*t*T_FINAL, np.e**(-0.012732*t*T_FINAL))
@@ -52,7 +54,9 @@ def get_velocity(A, B):
                                 A * cortical_flow_r * 
                                         (np.cross(u23, -u12) -
                                         np.cross(-u23, u34) -
-                                        np.cross(u34, k_hat)))
+                                        np.cross(u34, k_hat) - 
+                                        np.cross(u3p2, u34))
+                                )
 
         ABpl_prime = T_FINAL * (B * ((dist14 - 1) * -u14 +
                                         (dist34 - 1) * -u34 - 
@@ -60,7 +64,9 @@ def get_velocity(A, B):
                                 A * cortical_flow_l * 
                                         (np.cross(u14, u12) -
                                         np.cross(-u14, -u34) -
-                                        np.cross(-u34, k_hat)))
+                                        np.cross(-u34, k_hat) - 
+                                        np.cross(u4p2, -u34))
+                                )
         
         # applies spring force across cells in next iteration
         if dist13 <= 1:

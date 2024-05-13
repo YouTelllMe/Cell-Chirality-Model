@@ -3,7 +3,7 @@ import numpy as np
 
 from ..least_distance.minimize import find_min
 from ..least_distance.ellipsoid import min_point_ellpsoid
-from .model_config import T_FINAL
+from .model_config import T_FINAL, P2
 
 def get_velocity(A, B):
 
@@ -30,11 +30,13 @@ def get_velocity(A, B):
         u23 = (ABpr-ABar) / dist23 # 3-2
         u24 = (ABpl-ABar) / dist24 # 4-2
         u34 = (ABpl-ABpr) / dist34 # 4-3
+        u3p2 = (P2 - ABpr) / np.linalg.norm(P2 - ABpr)
+        u4p2 = (P2 - ABpl) /  np.linalg.norm(P2 - ABpl)
         k_hat = np.array([0,0,1])
+
 
         cortical_flow_r = 0.000345*t*T_FINAL*np.e**(-0.012732*t*T_FINAL)
         cortical_flow_l = 0.00071*t*T_FINAL*np.e**(-0.0166*t*T_FINAL)
-        
 
         # avg of two cortical flows
         a = 0.0005275 
@@ -43,32 +45,36 @@ def get_velocity(A, B):
         cortical_int_scale = 51.040149469200486 # ensures at the end, final spring length is 1.5
         cortical_int *= cortical_int_scale
 
-        ABal_prime = T_FINAL * (B * ((dist12 - (1 + cortical_int)) * u12 + 
-                                        (dist14 - (1 + cortical_int)) * u14) + 
+        ABal_prime = T_FINAL * (B * ((dist12 - 1) * u12 + 
+                                        (dist14 - 1) * u14) + 
                                 A * cortical_flow_l * 
                                         (np.cross(-u14, -u34) - 
                                         np.cross(u14, u12) -
                                         np.cross(u12, k_hat)))
-        ABar_prime = T_FINAL * (B * ((dist12 - (1 + cortical_int)) * -u12 + 
-                                        (dist23 - (1 + cortical_int)) * u23) + 
+        ABar_prime = T_FINAL * (B * ((dist12 - 1) * -u12 + 
+                                        (dist23 - 1) * u23) + 
                                 A * cortical_flow_r * 
                                         (np.cross(-u23, u34) -
                                         np.cross(u23, -u12) -
                                         np.cross(-u12, k_hat)))
 
-        ABpr_prime = T_FINAL * (B * ((dist23 - (1 + cortical_int)) * -u23 + 
-                                        (dist34 - (1 + cortical_int)) * u34) + 
+        ABpr_prime = T_FINAL * (B * ((dist23 - 1) * -u23 + 
+                                        (dist34 - 1) * u34) + 
                                 A * cortical_flow_r * 
                                         (np.cross(u23, -u12) -
                                         np.cross(-u23, u34) -
-                                        np.cross(u34, k_hat)))
+                                        np.cross(u34, k_hat) - 
+                                        np.cross(u3p2, u34))
+                                )
 
-        ABpl_prime = T_FINAL * (B * ((dist14 - (1 + cortical_int)) * -u14 +
-                                        (dist34 - (1 + cortical_int)) * -u34) + 
+        ABpl_prime = T_FINAL * (B * ((dist14 - 1) * -u14 +
+                                        (dist34 - 1) * -u34) + 
                                 A * cortical_flow_l * 
                                         (np.cross(u14, u12) -
                                         np.cross(-u14, -u34) -
-                                        np.cross(-u34, k_hat)))
+                                        np.cross(-u34, k_hat) - 
+                                        np.cross(u4p2, -u34))
+                                )
         
         # applies spring force across cells in next iteration
         if dist13 <= 1:
@@ -79,11 +85,28 @@ def get_velocity(A, B):
                 ABar_prime += T_FINAL * B * (dist24 - 1) * u24
                 ABpl_prime += T_FINAL * B * (dist24 - 1) * -u24
 
-        # cell wall forces 
-        ABal_prime += T_FINAL * B * _cell_wall_step(ABal)
-        ABar_prime += T_FINAL * B * _cell_wall_step(ABar)
-        ABpr_prime += T_FINAL * B * _cell_wall_step(ABpr)
-        ABpl_prime += T_FINAL * B * _cell_wall_step(ABpl)
+        e0, e1 = (3/2, 1)
+        min_vector_ABal = ABal - min_point_ellpsoid(ABal, e0, e1)
+        min_vector_ABar = ABar - min_point_ellpsoid(ABar, e0, e1)
+        min_vector_ABpr = ABpr - min_point_ellpsoid(ABpr, e0, e1)
+        min_vector_ABpl = ABpl - min_point_ellpsoid(ABpl, e0, e1)
+
+        min_dist_ABal = np.linalg.norm(min_vector_ABal)
+        min_dist_ABar = np.linalg.norm(min_vector_ABar)
+        min_dist_ABpr = np.linalg.norm(min_vector_ABpr)
+        min_dist_ABpl = np.linalg.norm(min_vector_ABpl)
+
+        # cell wall linear forces 
+        ABal_prime += T_FINAL * B * _cell_wall_step_simplified(min_vector_ABal, min_dist_ABal)
+        ABar_prime += T_FINAL * B * _cell_wall_step_simplified(min_vector_ABar, min_dist_ABar)
+        ABpr_prime += T_FINAL * B * _cell_wall_step_simplified(min_vector_ABpr, min_dist_ABpr)
+        ABpl_prime += T_FINAL * B * _cell_wall_step_simplified(min_vector_ABpl, min_dist_ABpl)
+
+        # cell wall friction
+        ABal_prime += T_FINAL * B * _cell_wall_step_simplified(min_vector_ABal, min_dist_ABal)
+        ABar_prime += T_FINAL * B * _cell_wall_step_simplified(min_vector_ABar, min_dist_ABar)
+        ABpr_prime += T_FINAL * B * _cell_wall_step_simplified(min_vector_ABpr, min_dist_ABpr)
+        ABpl_prime += T_FINAL * B * _cell_wall_step_simplified(min_vector_ABpl, min_dist_ABpl)
 
         # print("time(s): ", time.time()-start)    
 
@@ -91,20 +114,14 @@ def get_velocity(A, B):
     return func
 
 
-def _cell_wall_step(pos):
+def _cell_wall_step_simplified(min_vector, min_dist):
         """
         If the cell is outside the shell the shell pushes it away.
 
         Current force is Linear. Could also implemet using Van der Waals forces 
-        https://www.sciencedirect.com/topics/pharmacology-toxicology-and-pharmaceutical-science/van-der-waals-force
+        https://en.wikipedia.org/wiki/Van_der_Waals_force
         """
-
-        e0, e1 = (3/2, 1)
-        min_point = min_point_ellpsoid(pos, e0, e1)
-        distance = np.linalg.norm(min_point-pos)
-        if distance < 0.5:  
-                # return np.array((0.5-distance)*(pos-min_point)/distance) # linear
-                # return np.array(((0.5/distance)**12 - (0.5/distance)**6)*(pos-min_point)/distance) # van der waals
-                return np.array((1/distance-2)*(pos-min_point)/distance) # exponential force
+        if min_dist < 0.5:  
+                return np.array((0.5-min_dist)*(min_vector)/min_dist)
         else: 
-                return np.zeros(len(pos))
+                return np.zeros(len(min_vector))

@@ -4,7 +4,7 @@ from scipy.optimize import curve_fit
 from scipy.stats import t
 from collections.abc import Sequence
 from ..Simulator import Simulator
-from .config import GET_VELOCITY, INIT
+from .fit_config import GET_VELOCITY, INIT
 
 
 def fit_model_whole(raw_data):
@@ -22,7 +22,8 @@ def fit_model_whole(raw_data):
     y_data = np.concatenate((ABa_dorsal, ABp_dorsal, ABa_ant, ABp_ant, manual_distances))
     x_data = ()
 
-    popt, pcov = curve_fit(fit_model_curve, x_data, y_data, p0=(1,1))
+    popt, pcov = curve_fit(fit_model_curve, x_data, y_data, p0=(1,1),
+                           bounds=(0, np.inf))
 
     alpha = 0.05 # 95% confidence interval = 100*(1-alpha)
     n = len(y_data)    # number of data points
@@ -38,7 +39,7 @@ def fit_model_curve(x: Sequence[float], A: float, B: float):
     """
     """
     print(A, B)
-    sim = Simulator(GET_VELOCITY(A, B, 195), INIT)
+    sim = Simulator(GET_VELOCITY(A, B), INIT)
     sim.run(False)
 
     ABa_dorsal = sim.angle["ABa_dorsal"]

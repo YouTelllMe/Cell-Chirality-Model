@@ -6,7 +6,7 @@ import time
 
 class Simulator:
 
-    def __init__(self, model_func, y0, **kwargs) -> None:
+    def __init__(self, model_func, y0) -> None:
         self.y0 = y0
         self.TAU_INITIAL = 0
         self.TAU_FINAL = 1 # non-dimensionalized

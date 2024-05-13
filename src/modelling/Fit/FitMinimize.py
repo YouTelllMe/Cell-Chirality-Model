@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy.optimize import fmin, minimize 
 from ..Simulator import Simulator
-from .config import GET_VELOCITY
+from .fit_config import GET_VELOCITY
 
 
 def fit_fmin_model(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,

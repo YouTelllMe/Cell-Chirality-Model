@@ -1,11 +1,11 @@
 from modelling.Simulator import Simulator
-from modelling.ModelAB import ModelAB
-from modelling import ModelExtendingSpring
+from modelling.models import ModelAB
+from modelling.models import ModelExtendingSpring
 from plot.Animator import Animator
 from helpers import get_data, get_cortical_data
-from modelling.Fit.FitCurveFit import fit_model_whole
-from modelling.Fit.FitMinimize import fit_fmin_model
-from modelling.Fit.FitCoritcalFlow import fit_cortical
+from modelling.fit.FitCurveFit import fit_model_whole
+from modelling.fit.FitMinimize import fit_fmin_model
+from modelling.fit.FitCoritcalFlow import fit_cortical
 
 import matplotlib.pyplot as plt
 
@@ -46,9 +46,8 @@ def fit():
 
 def run():
     "RUN, SAVE, AND ANIMATE"
-    # sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=0.12868516070638591, B=1.0814748125814821, t_final=195,
-    #                 surfaces=None)
-    sim = Simulator(ModelExtendingSpring.get_velocity(1.09983719, 9.77537419, 195), (0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0, -0.5, 0.5, 0))
+    sim = Simulator(ModelAB.get_velocity(0.12693928, 0.06383564, 195), (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5))
+    # sim = Simulator(ModelExtendingSpring.get_velocity(0.12693815, 0.06383225, 195), (0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0, -0.5, 0.5, 0))
     sim.run(True)
     animator = Animator(sim.df)
     animator.animate()
@@ -94,6 +93,6 @@ def fit_cortical_flow():
 
 
 if __name__ == "__main__":
-    # run()
-    # plot_data()
-    fit() 
+    run()
+    plot_data()
+    # fit() 

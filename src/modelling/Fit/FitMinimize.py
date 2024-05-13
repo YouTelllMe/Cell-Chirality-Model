@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 from scipy.optimize import fmin, minimize 
-from ..ModelAB import ModelAB
 from ..Simulator import Simulator
-from .. import ModelExtendingSpring
+from .config import GET_VELOCITY
+
 
 def fit_fmin_model(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
                          pd.DataFrame, pd.DataFrame, pd.DataFrame] | None = None) -> tuple[float, float]:
@@ -28,9 +28,9 @@ def residual_squared(x: tuple[float, float, float],
     """
     # initial point not included within tau
     A, B = x
-    # sim = Simulator(ModelAB, (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=A, B=B, t_final=195,
+    # sim = Simulator(fun(A, B, 195), (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=A, B=B, t_final=195,
     #                 surfaces=None)
-    sim = Simulator(ModelExtendingSpring.get_velocity(A, B, 195), (0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0, -0.5, 0.5, 0))
+    sim = Simulator(GET_VELOCITY(A, B, 195), (0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0, -0.5, 0.5, 0))
     sim.run(False)
 
     computed_dorsal_ABa = sim.angle["ABa_dorsal"].to_numpy()

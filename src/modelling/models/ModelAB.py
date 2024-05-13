@@ -5,6 +5,8 @@ def get_velocity(A, B, t_final):
     def func(t, y):
         """
         A division by 0 occurs when two cells overlap
+
+        ABal = 1, ABar = 2, ABpr = 3, ABpl = 4
         """
         ABal = np.array([y[0], y[1], y[2]])
         ABar = np.array([y[3], y[4], y[5]])

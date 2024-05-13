@@ -1,4 +1,4 @@
-# Cell-Chirality-Simulation
+# Cell-Chirality-Model
 
 Python Implementation of Cell Chirality Spring Model in early embryonic development of C. Elegans.
 
@@ -19,7 +19,7 @@ ES (extending spring) Models:
 2. ESp2-0, ESp2-30, ESp2-45
 3. allESp2-0, allESp2-30, allESp2-45
 
-So far, ESp2-45(A=0.1355238,B=0.02709549) and ABp2-45(A=0.1355238,B=0.02709549) have been the most promising candidates. Their fit and plots are included in the "Model Fit" section below.
+So far, ESp2-45(A=0.1355238,B=0.02709549) and ABp2-45(A=0.1355238,B=0.02709549) have been the most promising candidates. Their fit are included in the "Model Fit" section below. Also see visualizations and plots in "figures". 
 
 ## Further Models
 
@@ -33,7 +33,7 @@ Further model candidates include:
 
 This section goes over important notes about the code base and design decisions that should be revisited and perhaps reconsidered.
 
-- models use RK45 to resolve ODE, and the default fitting alg for scipy.curve_fit
+- models use RK45 to resolve ODE, and the default fitting alg of scipy.curve_fit for fitting
 - all models have diagonal springs that activate conditionally
 - the ABp cells have a spring with the p2 cell. For ES models, even though the springs expand, this spring with the p2 cell is fixed.
 - all ES models retain the spring between cells and the "EMS" (z=-0.5 plane). This makes the model a more complex but improves the dorsal fit
@@ -44,3 +44,8 @@ This section goes over important notes about the code base and design decisions 
 - the data is actually not great
 
 ## Model Fit
+### ABp2
+![CS ABp2 Fit](https://github.com/YouTelllMe/Cell-Chirality-Model/blob/main/figures/CSp2/fit.png)
+### ESp2
+![ES ESp2 Fit](https://github.com/YouTelllMe/Cell-Chirality-Model/blob/main/figures/ESp2/fit.png)
+

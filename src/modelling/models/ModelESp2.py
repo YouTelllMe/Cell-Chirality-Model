@@ -2,7 +2,7 @@ import time
 import numpy as np
 
 from ..least_distance.ellipsoid import min_point_ellpsoid
-from .model_config import T_FINAL, P2
+from .model_config import T_FINAL, P2, E0, E1
 
 def get_velocity(A, B):
 
@@ -47,20 +47,23 @@ def get_velocity(A, B):
         cortical_int *= cortical_int_scale
 
         ABal_prime = T_FINAL * (B * ((dist12 - (1 + cortical_int)) * u12 + 
-                                        (dist14 - 1) * u14) + 
+                                        (dist14 - (1 + cortical_int)) * u14 - 
+                                        ABal[2] * k_hat) + 
                                 A * cortical_flow_l * 
                                         (np.cross(-u14, -u34) - 
                                         np.cross(u14, u12) -
                                         np.cross(u12, k_hat)))
         ABar_prime = T_FINAL * (B * ((dist12 - (1 + cortical_int)) * -u12 + 
-                                        (dist23 - 1) * u23) + 
+                                        (dist23 - (1 + cortical_int)) * u23 - 
+                                        ABar[2] * k_hat) + 
                                 A * cortical_flow_r * 
                                         (np.cross(-u23, u34) -
                                         np.cross(u23, -u12) -
                                         np.cross(-u12, k_hat)))
 
-        ABpr_prime = T_FINAL * (B * ((dist23 - 1) * -u23 + 
-                                        (dist34 - (1 + cortical_int)) * u34 + 
+        ABpr_prime = T_FINAL * (B * ((dist23 - (1 + cortical_int)) * -u23 + 
+                                        (dist34 - (1 + cortical_int)) * u34 - 
+                                        ABpr[2] * k_hat +
                                         (dist3p2 - 1) * u3p2
                                         ) + 
                                 A * cortical_flow_r * 
@@ -70,8 +73,9 @@ def get_velocity(A, B):
                                         np.cross(u3p2, u34))
                                 )
 
-        ABpl_prime = T_FINAL * (B * ((dist14 - 1) * -u14 +
-                                        (dist34 - (1 + cortical_int)) * -u34+ 
+        ABpl_prime = T_FINAL * (B * ((dist14 - (1 + cortical_int)) * -u14 +
+                                        (dist34 - (1 + cortical_int)) * -u34 - 
+                                        ABpl[2] * k_hat +
                                         (dist4p2 - 1) * u4p2) + 
                                 A * cortical_flow_l * 
                                         (np.cross(u14, u12) -
@@ -109,8 +113,7 @@ def _cell_wall_step(pos):
         https://www.sciencedirect.com/topics/pharmacology-toxicology-and-pharmaceutical-science/van-der-waals-force
         """
 
-        e0, e1 = (3/2, 1)
-        min_point = min_point_ellpsoid(pos, e0, e1)
+        min_point = min_point_ellpsoid(pos, E0, E1)
         distance = np.linalg.norm(min_point-pos)
         if distance < 0.5:  
                 return np.array((0.5-distance)*(pos-min_point)/distance) # linear

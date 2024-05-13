@@ -14,5 +14,5 @@ GET_VELOCITY = ModelABp2.get_velocity
 # MODEL EXTENDING SPRING P2
 # GET_VELOCITY = ModelESp2.get_velocity
 
-# MODEL EXTENDING SPRING, Cell Wall Velocity; bad model, rlly messy
+# MODEL EXTENDING SPRING, Cell Wall Velocity
 # GET_VELOCITY = ModelESFriction.get_velocity

@@ -2,7 +2,7 @@ import time
 import numpy as np
 
 from ..least_distance.ellipsoid import min_point_ellpsoid
-from .model_config import T_FINAL
+from .model_config import T_FINAL, E0, E1
 
 def get_velocity(A, B):
 
@@ -98,8 +98,7 @@ def _cell_wall_step(pos):
         https://www.sciencedirect.com/topics/pharmacology-toxicology-and-pharmaceutical-science/van-der-waals-force
         """
 
-        e0, e1 = (3/2, 1)
-        min_point = min_point_ellpsoid(pos, e0, e1)
+        min_point = min_point_ellpsoid(pos, E0, E1)
         distance = np.linalg.norm(min_point-pos)
         if distance < 0.5:  
                 return np.array((0.5-distance)*(pos-min_point)/distance) # linear

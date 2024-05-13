@@ -17,10 +17,10 @@ def plot_fit(data, angles):
 
     #TODO?
     # get standard error of the mean
-    da_std = ABa_dorsal.std(axis=1).to_numpy() / np.sqrt(40)
-    dp_std = ABp_dorsal.std(axis=1).to_numpy() / np.sqrt(40)
-    aa_std = ABa_ant.std(axis=1).to_numpy() / np.sqrt(40)
-    ap_std = ABp_ant.std(axis=1).to_numpy() / np.sqrt(40)
+    da_std = ABa_dorsal.std(axis=1).to_numpy() / np.sqrt(10)
+    dp_std = ABp_dorsal.std(axis=1).to_numpy() / np.sqrt(10)
+    aa_std = ABa_ant.std(axis=1).to_numpy() / np.sqrt(10)
+    ap_std = ABp_ant.std(axis=1).to_numpy() / np.sqrt(10)
 
     # load data
     computed_ABa_dorsal = angles["ABa_dorsal"].to_numpy()
@@ -29,23 +29,35 @@ def plot_fit(data, angles):
     computed_ABp_ant = angles["ABp_anterior"].to_numpy()
 
     #t-test
+
+    #each entry is a row
     da_np = ABa_dorsal.to_numpy()
     dp_np = ABp_dorsal.to_numpy()
     aa_np = ABa_ant.to_numpy()
     ap_np = ABp_ant.to_numpy()
-
+   
+    # boolean array; True if t test passes, False if not 
     dorsal_t_test = []
     anterior_t_test = []
 
     #check
-    for row_index in range(10):
-        #TODO: is this right? 
-        dorsal_row_t_test = t_test(da_np[row_index], dp_np[row_index])
-        anterior_row_t_test = t_test(aa_np[row_index], ap_np[row_index])
-        dorsal_t_test.append(dorsal_row_t_test.pvalue >= 0.95)
-        anterior_t_test.append(anterior_row_t_test.pvalue >= 0.95)
+    for row_index in range(40):
+        # supression warning. All initial data are identical so can't perform t-test
+        if (row_index != 0):
+            dorsal_row_t_test = t_test(da_np[row_index], dp_np[row_index])
+            anterior_row_t_test = t_test(aa_np[row_index], ap_np[row_index])
+            # print(dorsal_row_t_test)
+            # print(anterior_row_t_test)
+            dorsal_t_test.append(dorsal_row_t_test.pvalue >= 0.95)
+            anterior_t_test.append(anterior_row_t_test.pvalue >= 0.95)
+        else:
+            dorsal_t_test.append(True)
+            anterior_t_test.append(True)
+
+    # True if not pass, False if pass
     dorsal_t_ntest = ~np.array(dorsal_t_test)
     anterior_t_ntest = ~np.array(anterior_t_test)
+
 
     # initialize graph, set Axes titles 
     fig, (axD, axA) = plt.subplots(2)

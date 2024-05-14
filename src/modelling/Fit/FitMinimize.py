@@ -9,7 +9,7 @@ def fit_fmin_model(ABa_dorsal_avg, ABp_dorsal_avg, ABa_ant_avg, ABp_ant_avg) -> 
     """
         
     A, B = fmin(residual, 
-                (0.01,0.1), 
+                (0.1, 0.01), 
                 args=(ABa_dorsal_avg, ABp_dorsal_avg, ABa_ant_avg, ABp_ant_avg))
     return (A, B)
 
@@ -21,10 +21,9 @@ def residual(x: tuple[float, float, float],
         ABp_ant_avg: pd.DataFrame):
 
     # initial point not included within tau
-    A, B = x
     # sim = Simulator(fun(A, B, 195), (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=A, B=B, t_final=195,
     #                 surfaces=None)
-    sim = Simulator(GET_VELOCITY(A, B), INIT)
+    sim = Simulator(GET_VELOCITY(x), INIT)
     sim.run(False)
 
     residual = 0

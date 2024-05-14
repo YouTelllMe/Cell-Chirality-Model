@@ -4,7 +4,7 @@ from scipy.optimize import curve_fit
 from scipy.stats import t
 from collections.abc import Sequence
 from ..Simulator import Simulator
-from .fit_config import GET_VELOCITY, GET_VELOCITY_3P, INIT
+from .fit_config import GET_VELOCITY, INIT
 
 
 def fit_model_whole(data):
@@ -18,9 +18,7 @@ def fit_model_whole(data):
     ABp_ant = data["ABp_ant_avg"].to_numpy().flatten("F")
 
     y_data = np.concatenate((ABa_dorsal, ABp_dorsal, ABa_ant, ABp_ant, manual_distances))
-    popt, pcov = curve_fit(fit_model_curve, (), y_data, p0=(0.01,0.1),
-                           bounds=(0, np.inf))
-
+    popt, pcov = curve_fit(fit_model_curve, (), y_data, p0=(0.1, 0.01), bounds=(0, np.inf))
 
     #TODO, this needs to be fixed; using average to fit now
     alpha = 0.05 # 95% confidence interval = 100*(1-alpha)
@@ -33,46 +31,17 @@ def fit_model_whole(data):
                          (np.diag(pcov)[1]**0.5)*tval))
 
 
-def fit_model_curve(x: Sequence[float], A: float, B: float):
+def fit_model_curve(x: Sequence[float], *params):
     """
     """
-    print(A, B)
-    sim = Simulator(GET_VELOCITY(A, B), INIT)
-    sim.run(False)
-    
-    ABa_dorsal = sim.angle["ABa_dorsal"]
-    ABp_dorsal = sim.angle["ABp_dorsal"]
-    ABa_ant = sim.angle["ABa_anterior"]
-    ABp_ant = sim.angle["ABp_anterior"]
-
-    computed_instance_N = np.concatenate((ABa_dorsal, 
-                                          ABp_dorsal,
-                                          ABa_ant,
-                                          ABp_ant,
-                                          sim.distance["12"],
-                                          sim.distance["23"],
-                                          sim.distance["34"],
-                                          sim.distance["14"]))
-    return computed_instance_N
-
-def fit_model_curve_3p(x: Sequence[float], A: float, B: float, C: float):
-    """
-    """
-    print(A, B, C)
-    sim = Simulator(GET_VELOCITY_3P(A, B, C), INIT)
+    sim = Simulator(GET_VELOCITY(params), INIT)
     sim.run(False)
 
-    ABa_dorsal = sim.angle["ABa_dorsal"]
-    ABp_dorsal = sim.angle["ABp_dorsal"]
-    ABa_ant = sim.angle["ABa_anterior"]
-    ABp_ant = sim.angle["ABp_anterior"]
-
-    computed_instance_N = np.concatenate((ABa_dorsal, 
-                                          ABp_dorsal,
-                                          ABa_ant,
-                                          ABp_ant,
-                                          sim.distance["12"],
-                                          sim.distance["23"],
-                                          sim.distance["34"],
-                                          sim.distance["14"]))
-    return computed_instance_N
+    return np.concatenate((sim.angle["ABa_dorsal"], 
+                            sim.angle["ABp_dorsal"],
+                            sim.angle["ABa_anterior"],
+                            sim.angle["ABp_anterior"],
+                            sim.distance["12"],
+                            sim.distance["23"],
+                            sim.distance["34"],
+                            sim.distance["14"]))

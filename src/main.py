@@ -17,15 +17,14 @@ from plot.plot_fit import plot_fit
 def fit():
     "FIT; make sure to customize the model in the fit functions"
     # print(fit_fmin_model(get_angular_data()))
-
-
-    model_fit = fit_model_whole(get_angular_data())
+    data_stat = pd.read_excel("./data/data_stat.xlsx")
+    model_fit = fit_model_whole(data_stat)
     print(model_fit)
     return model_fit
 
-def run(A, B):
+def run(params):
     "RUN, SAVE, AND ANIMATE"
-    sim = Simulator(GET_VELOCITY(A, B), INIT)
+    sim = Simulator(GET_VELOCITY(params), INIT)
     sim.run(True)
     animator = Animator(sim.df)
     animator.animate()
@@ -67,6 +66,4 @@ def fit_cortical_flow():
 
 
 if __name__ == "__main__":
-    res = fit() 
-    run(res[0][0], res[0][1])
-    plot_data()
+    fit() 

@@ -4,7 +4,7 @@ import numpy as np
 from ..least_distance.ellipsoid import min_point_ellpsoid
 from .model_config import T_FINAL, E0, E1
 
-def get_velocity(A, B):
+def get_velocity(params):
 
     def func(t, y):
         """
@@ -41,37 +41,37 @@ def get_velocity(A, B):
         cortical_int_scale = 51.040149469200486 # ensures at the end, final spring length is 1.5
         cortical_int *= cortical_int_scale
 
-        ABal_prime = T_FINAL * (B * ((dist12 - (1 + cortical_int)) * u12 + 
+        ABal_prime = T_FINAL * (params[0] * ((dist12 - (1 + cortical_int)) * u12 + 
                                         (dist14 - 1) * u14) + 
-                                A * cortical_flow_l * 
+                                params[1] * cortical_flow_l * 
                                         (np.cross(-u14, -u34) - 
                                         np.cross(u14, u12)))
-        ABar_prime = T_FINAL * (B * ((dist12 - (1 + cortical_int)) * -u12 + 
+        ABar_prime = T_FINAL * (params[0] * ((dist12 - (1 + cortical_int)) * -u12 + 
                                         (dist23 - 1) * u23) + 
-                                A * cortical_flow_r * 
+                                params[1] * cortical_flow_r * 
                                         (np.cross(-u23, u34) -
                                         np.cross(u23, -u12)))
 
-        ABpr_prime = T_FINAL * (B * ((dist23 - 1) * -u23 + 
+        ABpr_prime = T_FINAL * (params[0] * ((dist23 - 1) * -u23 + 
                                         (dist34 - (1 + cortical_int)) * u34) + 
-                                A * cortical_flow_r * 
+                                params[1] * cortical_flow_r * 
                                         (np.cross(u23, -u12) -
                                         np.cross(-u23, u34)))
 
-        ABpl_prime = T_FINAL * (B * ((dist14 - 1) * -u14 +
+        ABpl_prime = T_FINAL * (params[0] * ((dist14 - 1) * -u14 +
                                         (dist34 - (1 + cortical_int)) * -u34) + 
-                                A * cortical_flow_l * 
+                                params[1] * cortical_flow_l * 
                                         (np.cross(u14, u12) -
                                         np.cross(-u14, -u34)))
         
         # applies spring force across cells in next iteration
         if dist13 <= 1:
-                ABal_prime += T_FINAL * B * (dist13 - 1) * u13
-                ABpr_prime += T_FINAL * B * (dist13 - 1) * -u13
+                ABal_prime += T_FINAL * params[0] * (dist13 - 1) * u13
+                ABpr_prime += T_FINAL * params[0] * (dist13 - 1) * -u13
 
         if dist24 <= 1:
-                ABar_prime += T_FINAL * B * (dist24 - 1) * u24
-                ABpl_prime += T_FINAL * B * (dist24 - 1) * -u24
+                ABar_prime += T_FINAL * params[0] * (dist24 - 1) * u24
+                ABpl_prime += T_FINAL * params[0] * (dist24 - 1) * -u24
 
         min_vector_ABal = min_point_ellpsoid(ABal, E0, E1) - ABal
         min_vector_ABar = min_point_ellpsoid(ABar, E0, E1) - ABar
@@ -89,16 +89,16 @@ def get_velocity(A, B):
         min_u_ABpl = min_vector_ABpl/min_dist_ABpl
 
         # cell wall linear forces 
-        ABal_prime += T_FINAL * B * _cell_wall_step_simplified(-min_vector_ABal, min_dist_ABal)
-        ABar_prime += T_FINAL * B * _cell_wall_step_simplified(-min_vector_ABar, min_dist_ABar)
-        ABpr_prime += T_FINAL * B * _cell_wall_step_simplified(-min_vector_ABpr, min_dist_ABpr)
-        ABpl_prime += T_FINAL * B * _cell_wall_step_simplified(-min_vector_ABpl, min_dist_ABpl)
+        ABal_prime += T_FINAL * params[0] * _cell_wall_step_simplified(-min_vector_ABal, min_dist_ABal)
+        ABar_prime += T_FINAL * params[0] * _cell_wall_step_simplified(-min_vector_ABar, min_dist_ABar)
+        ABpr_prime += T_FINAL * params[0] * _cell_wall_step_simplified(-min_vector_ABpr, min_dist_ABpr)
+        ABpl_prime += T_FINAL * params[0] * _cell_wall_step_simplified(-min_vector_ABpl, min_dist_ABpl)
 
         # cell wall friction
-        ABal_prime += T_FINAL * A * cortical_flow_l * np.cross(u12, min_u_ABal)
-        ABar_prime += T_FINAL * A * cortical_flow_r * np.cross(-u12, min_u_ABar)
-        ABpr_prime += T_FINAL * A * cortical_flow_r * np.cross(u34, min_u_ABpr)
-        ABpl_prime += T_FINAL * A * cortical_flow_l * np.cross(-u34, min_u_ABpl)
+        ABal_prime += T_FINAL * params[1] * cortical_flow_l * np.cross(u12, min_u_ABal)
+        ABar_prime += T_FINAL * params[1] * cortical_flow_r * np.cross(-u12, min_u_ABar)
+        ABpr_prime += T_FINAL * params[1] * cortical_flow_r * np.cross(u34, min_u_ABpr)
+        ABpl_prime += T_FINAL * params[1] * cortical_flow_l * np.cross(-u34, min_u_ABpl)
 
         # print("time(s): ", time.time()-start)    
 

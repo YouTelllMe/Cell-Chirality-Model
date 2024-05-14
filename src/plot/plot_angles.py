@@ -5,12 +5,12 @@ import pandas as pd
 
 
 def plot_angles(ax: Axes, 
-                  angles_df: pd.DataFrame, 
-                  ABa_dorsal, 
-                  ABp_dorsal, 
-                  ABa_ant, 
-                  ABp_ant
-                  ) -> None:
+                angles_df: pd.DataFrame, 
+                ABa_dorsal, 
+                ABp_dorsal, 
+                ABa_ant, 
+                ABp_ant
+                ) -> None:
     """
     Plots the Theta (anterior) vs Phi (dorsal) graph on the given Axes.
     """

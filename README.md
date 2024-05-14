@@ -19,7 +19,7 @@ ES (extending spring) Models:
 2. ESp2-0, ESp2-30, ESp2-45
 3. allESp2-0, allESp2-30, allESp2-45
 
-So far, ESp2-45(A=0.1355238,B=0.02709549) and ABp2-45(A=0.1355238,B=0.02709549) have been the most promising candidates. Their fit are included in the "Model Fit" section below. Also see visualizations and plots in "figures". 
+So far, ESp2-45(A=0.1355238,B=0.02709549) and ABp2-45(A=0.1355238,B=0.02709549) have been the most promising candidates. Their fit are included in the "Model Fit" section below. Also see visualizations and plots in "figures".
 
 ## Further Models
 
@@ -42,10 +42,15 @@ This section goes over important notes about the code base and design decisions 
 - the models themselves have the directions worked out and only requires that the parameters be the suitable magnitudes. Thus, the fit for parameters is bounded to be >= 0
 - the initial parameter guess is a vector of all 0s
 - the data is actually not great
+- instead of residual square in minimize, I am using residual to fit now since I use the built in norm function, so it's easier not to square it
+- fits now use average to fit
 
 ## Model Fit
-### ABp2
-![CS ABp2 Fit](https://github.com/YouTelllMe/Cell-Chirality-Model/blob/main/figures/CSp2/fit.png)
-### ESp2
-![ES ESp2 Fit](https://github.com/YouTelllMe/Cell-Chirality-Model/blob/main/figures/ESp2/fit.png)
 
+### ABp2
+
+![CS ABp2 Fit](https://github.com/YouTelllMe/Cell-Chirality-Model/blob/main/figures/CSp2/fit.png)
+
+### ESp2
+
+![ES ESp2 Fit](https://github.com/YouTelllMe/Cell-Chirality-Model/blob/main/figures/ESp2/fit.png)

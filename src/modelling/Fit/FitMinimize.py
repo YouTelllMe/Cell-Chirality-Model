@@ -2,61 +2,54 @@ import pandas as pd
 import numpy as np
 from scipy.optimize import fmin, minimize 
 from ..Simulator import Simulator
-from .fit_config import GET_VELOCITY
+from .fit_config import GET_VELOCITY, INIT
 
-
-def fit_fmin_model(data: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
-                         pd.DataFrame, pd.DataFrame, pd.DataFrame] | None = None) -> tuple[float, float]:
+def fit_fmin_model(ABa_dorsal_avg, ABp_dorsal_avg, ABa_ant_avg, ABp_ant_avg) -> tuple[float, float]:
     """
     """
-
-    (ABa_dorsal, ABp_dorsal, dorsal_t, ABa_ant, ABp_ant, anterior_t) = data
         
-    A, B = fmin(residual_squared, 
-                [0.12,10], 
-                args=(ABa_dorsal, ABp_dorsal, ABa_ant, ABp_ant))
+    A, B = fmin(residual, 
+                (0.01,0.1), 
+                args=(ABa_dorsal_avg, ABp_dorsal_avg, ABa_ant_avg, ABp_ant_avg))
     return (A, B)
 
 
-def residual_squared(x: tuple[float, float, float], 
-        ABa_dorsal: pd.DataFrame, 
-        ABp_dorsal: pd.DataFrame, 
-        ABa_ant: pd.DataFrame, 
-        ABp_ant: pd.DataFrame):
-    """
-    residual_squares of angles
-    """
+def residual(x: tuple[float, float, float], 
+        ABa_dorsal_avg: pd.DataFrame, 
+        ABp_dorsal_avg: pd.DataFrame, 
+        ABa_ant_avg: pd.DataFrame, 
+        ABp_ant_avg: pd.DataFrame):
+
     # initial point not included within tau
     A, B = x
     # sim = Simulator(fun(A, B, 195), (0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5), A=A, B=B, t_final=195,
     #                 surfaces=None)
-    sim = Simulator(GET_VELOCITY(A, B, 195), (0.5, 0.5, 0, 0.5, -0.5, 0, -0.5, -0.5, 0, -0.5, 0.5, 0))
+    sim = Simulator(GET_VELOCITY(A, B), INIT)
     sim.run(False)
+
+    residual = 0
 
     computed_dorsal_ABa = sim.angle["ABa_dorsal"].to_numpy()
     computed_ABp_dorsal = sim.angle["ABp_dorsal"].to_numpy()
-    computed_ABa_anterior = sim.angle["ABa_anterior"].to_numpy()
-    computed_ABp_anterior = sim.angle["ABp_anterior"].to_numpy()
-    residual_square = 0
+    computed_ABa_anterior = sim.angle["ABa_ant"].to_numpy()
+    computed_ABp_anterior = sim.angle["ABp_ant"].to_numpy()
 
-    for column_index in range(10):
-        da_residual = ABa_dorsal.iloc[:,column_index].to_numpy() - computed_dorsal_ABa
-        dp_residual = ABp_dorsal.iloc[:,column_index].to_numpy() - computed_ABp_dorsal
-        aa_residual = ABa_ant.iloc[:,column_index].to_numpy() - computed_ABa_anterior
-        ap_residual = ABp_ant.iloc[:,column_index].to_numpy() - computed_ABp_anterior
+    da_residual = ABa_dorsal_avg.to_numpy() - computed_dorsal_ABa
+    dp_residual = ABp_dorsal_avg.to_numpy() - computed_ABp_dorsal
+    aa_residual = ABa_ant_avg.to_numpy() - computed_ABa_anterior
+    ap_residual = ABp_ant_avg.to_numpy() - computed_ABp_anterior
         
-        residual_square += (np.linalg.norm(da_residual) ** 2
-                          + np.linalg.norm(dp_residual) ** 2
-                          + np.linalg.norm(aa_residual) ** 2
-                          + np.linalg.norm(ap_residual) ** 2)
+    residual += (np.linalg.norm(da_residual)
+                        + np.linalg.norm(dp_residual)
+                        + np.linalg.norm(aa_residual)
+                        + np.linalg.norm(ap_residual))
 
     epsilon = 1
 
     # makes distance 1
-    residual_square += epsilon * ((np.sum(sim.distance["12"].to_numpy() - np.ones(40))) ** 2 +
-                                (np.sum(sim.distance["23"].to_numpy() - np.ones(40))) ** 2 +
-                                (np.sum(sim.distance["34"].to_numpy() - np.ones(40))) ** 2 +
-                                (np.sum(sim.distance["14"].to_numpy() - np.ones(40))) ** 2)
+    residual += epsilon * ((np.sum(sim.distance["12"].to_numpy() - np.ones(40))) +
+                                (np.sum(sim.distance["23"].to_numpy() - np.ones(40))) +
+                                (np.sum(sim.distance["34"].to_numpy() - np.ones(40))) +
+                                (np.sum(sim.distance["14"].to_numpy() - np.ones(40))))
     
-    print(residual_square)
-    return residual_square
+    return residual

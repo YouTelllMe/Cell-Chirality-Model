@@ -89,14 +89,14 @@ class Simulator:
         self.angle['ABp_dorsal'] = np.arccos(-ABp['x']/np.sqrt(ABp['x']**2 + ABp['y']**2)) * 180 / np.pi
 
         #anterior view ; anterior view is from the front; (y,z), (1,0) is 0 degrees. Dot with (1,0)
-        self.angle['ABa_anterior'] = np.arccos(ABa['y']/np.sqrt(ABa['y']**2 + ABa['z']**2)) * 180 / np.pi
-        self.angle['ABp_anterior'] = np.arccos(ABp['-y']/np.sqrt(ABp['y']**2 + ABp['z']**2)) * 180 / np.pi
+        self.angle['ABa_ant'] = np.arccos(ABa['y']/np.sqrt(ABa['y']**2 + ABa['z']**2)) * 180 / np.pi
+        self.angle['ABp_ant'] = np.arccos(ABp['-y']/np.sqrt(ABp['y']**2 + ABp['z']**2)) * 180 / np.pi
 
         # print(self.angle.head())
         for i in range(len(self.angle.index)):
             # print(ABa.at[i,'z'])
             if ABa.at[i,'z'] < 0:
-                self.angle.at[i,'ABa_anterior'] *= -1
+                self.angle.at[i,'ABa_ant'] *= -1
             if ABp.at[i,'z'] < 0:
-                self.angle.at[i,'ABp_anterior'] *= -1
+                self.angle.at[i,'ABp_ant'] *= -1
         

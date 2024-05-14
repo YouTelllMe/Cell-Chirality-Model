@@ -1,5 +1,5 @@
 venv/
-raw_data/
+data/
 other/
 __pycache__/
 model_output/

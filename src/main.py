@@ -2,8 +2,6 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from helpers import get_data, get_cortical_data
-
 from modelling.Simulator import Simulator
 from modelling.fit.FitCurveFit import fit_model_whole
 from modelling.fit.FitMinimize import fit_fmin_model
@@ -18,8 +16,10 @@ from plot.plot_fit import plot_fit
 
 def fit():
     "FIT; make sure to customize the model in the fit functions"
-    # print(fit_fmin_model(get_data()))
-    model_fit = fit_model_whole(get_data())
+    # print(fit_fmin_model(get_angular_data()))
+
+
+    model_fit = fit_model_whole(get_angular_data())
     print(model_fit)
     return model_fit
 
@@ -32,16 +32,14 @@ def run(A, B):
 
 def plot_data():
     "PLOTTING"
-    distances_xls = pd.ExcelFile("distances.xlsx")
-    angles_xls = pd.ExcelFile("angles.xlsx")
-    output_xls = pd.ExcelFile("output.xlsx")
-    distances = pd.read_excel(distances_xls, "Sheet1")
-    angles = pd.read_excel(angles_xls, "Sheet1")
-    output = pd.read_excel(output_xls, "Sheet1")
-
-
-    data = get_data()
-    (ABa_dorsal, ABp_dorsal, dorsal_t, ABa_ant, ABp_ant, anterior_t) = data
+    distances = pd.read_excel("distances.xlsx")
+    angles = pd.read_excel("angles.xlsx")
+    output = pd.read_excel("output.xlsx")
+    ABa_dorsal = pd.read_excel("./data/data_ABa_dorsal.xlsx").drop(["t"], axis=1, inplace=True)
+    ABp_dorsal = pd.read_excel("./data/data_ABp_dorsal.xlsx").drop(["t"], axis=1, inplace=True)
+    ABa_ant = pd.read_excel("./data/data_ABa_ant.xlsx").drop(["t"], axis=1, inplace=True)
+    ABp_ant = pd.read_excel("./data/data_ABp_ant.xlsx").drop(["t"], axis=1, inplace=True)
+    data_stat = pd.read_excel("./data/data_stat.xlsx")
 
     fig, ((axX, axZ),(axDist, axDegree)) = plt.subplots(2, 2)
     fig.set_figheight(7)
@@ -51,19 +49,21 @@ def plot_data():
     axDist.title.set_text("Distances")
     axDegree.title.set_text("Theta vs Phi")
 
-    # # run plotting helper functions; saves figure
+    # run plotting helper functions; saves figure
     plot_distance(axDist, distances)
     plot_angles(axDegree, angles, ABa_dorsal, ABp_dorsal, ABa_ant, ABp_ant)
     plot_xz(axX, axZ, output)
-    plt.savefig('xzpng')
+    plt.savefig('xz.png')
 
-    plot_fit(data, angles)
+    plot_fit(data_stat, angles)
 
 
 def fit_cortical_flow():
     "FIT CORTICAL FLOW"
-    data = get_cortical_data()
-    fit_cortical(data)
+    cortical_l = pd.read_excel("./data/data_cortical_l.xlsx")
+    cortical_r = pd.read_excel("./data/data_cortical_r.xlsx")
+    fit_cortical(cortical_l, "cortical_l")
+    fit_cortical(cortical_r, "cortical_r")
 
 
 if __name__ == "__main__":

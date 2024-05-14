@@ -11,14 +11,26 @@ def fit_model_whole(data):
     """
     """
 
-    manual_distances = np.ones(160)
-    ABa_dorsal = data["ABa_dorsal_avg"].to_numpy().flatten("F")
-    ABp_dorsal = data["ABp_dorsal_avg"].to_numpy().flatten("F")
-    ABa_ant = data["ABa_ant_avg"].to_numpy().flatten("F")
-    ABp_ant = data["ABp_ant_avg"].to_numpy().flatten("F")
+    ones = np.ones(160)
+    ABa_dorsal = data["ABa_dorsal_avg"].to_numpy()
+    ABp_dorsal = data["ABp_dorsal_avg"].to_numpy()
+    ABa_ant = data["ABa_ant_avg"].to_numpy()
+    ABp_ant = data["ABp_ant_avg"].to_numpy()
 
-    y_data = np.concatenate((ABa_dorsal, ABp_dorsal, ABa_ant, ABp_ant, manual_distances))
-    popt, pcov = curve_fit(fit_model_curve, (), y_data, p0=(0.1, 0.01), bounds=(0, np.inf))
+    ABa_dorsal_stdmean = data["ABa_dorsal_stdeofmean"].to_numpy()
+    ABp_dorsal_stdmean = data["ABp_dorsal_stdeofmean"].to_numpy()
+    ABa_ant_stdmean = data["ABa_ant_stdeofmean"].to_numpy()
+    ABp_ant_stdmean = data["ABp_ant_stdeofmean"].to_numpy()
+
+    epsilon = 0.25
+    y_data = np.concatenate((ABa_dorsal, ABp_dorsal, ABa_ant, ABp_ant, ones))
+    y_error_of_mean = np.concatenate((ABa_dorsal_stdmean, 
+                                      ABp_dorsal_stdmean, 
+                                      ABa_ant_stdmean, 
+                                      ABp_ant_stdmean, 
+                                      ones*epsilon))
+
+    popt, pcov = curve_fit(fit_model_curve, (), y_data, p0=(0.1, 0.01), bounds=(0, np.inf), sigma=y_error_of_mean)
 
     #TODO, this needs to be fixed; using average to fit now
     alpha = 0.05 # 95% confidence interval = 100*(1-alpha)

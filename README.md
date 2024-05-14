@@ -44,6 +44,7 @@ This section goes over important notes about the code base and design decisions 
 - the data is actually not great
 - instead of residual square in minimize, I am using residual to fit now since I use the built in norm function, so it's easier not to square it
 - fits now use average to fit
+- 10^6 for sigma for curve fitting when the mean error is 0
 
 ## Model Fit
 

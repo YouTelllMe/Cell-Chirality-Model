@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
 import scipy
-from ..utils import row_average_pd
 
 def plot_fit(data, angles):
     """
@@ -31,8 +30,8 @@ def plot_fit(data, angles):
     #t-test
    
     # boolean array; True if t test passes, False if not 
-    dorsal_t_test =  angles["dorsal_t_test"].to_numpy()
-    anterior_t_test =  angles["ant_t_test"].to_numpy()
+    dorsal_t_test =  data["dorsal_t_test"].to_numpy()
+    anterior_t_test =  data["ant_t_test"].to_numpy()
 
     # True if not pass, False if pass
     dorsal_t_ntest = ~np.array(dorsal_t_test)

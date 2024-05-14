@@ -11,7 +11,7 @@ def fit_model_whole(data):
     """
     """
 
-    ones = np.ones(160)
+    ones_160 = np.ones(160)
     ABa_dorsal = data["ABa_dorsal_avg"].to_numpy()
     ABp_dorsal = data["ABp_dorsal_avg"].to_numpy()
     ABa_ant = data["ABa_ant_avg"].to_numpy()
@@ -22,15 +22,16 @@ def fit_model_whole(data):
     ABa_ant_stdmean = data["ABa_ant_stdeofmean"].to_numpy()
     ABp_ant_stdmean = data["ABp_ant_stdeofmean"].to_numpy()
 
-    epsilon = 0.25
-    y_data = np.concatenate((ABa_dorsal, ABp_dorsal, ABa_ant, ABp_ant, ones))
-    y_error_of_mean = np.concatenate((ABa_dorsal_stdmean, 
+    distance_std = 0.25
+    y_data = np.concatenate((ABa_dorsal, ABp_dorsal, ABa_ant, ABp_ant, ones_160))
+    y_error = np.concatenate((ABa_dorsal_stdmean, 
                                       ABp_dorsal_stdmean, 
                                       ABa_ant_stdmean, 
                                       ABp_ant_stdmean, 
-                                      ones*epsilon))
-
-    popt, pcov = curve_fit(fit_model_curve, (), y_data, p0=(0.1, 0.01), bounds=(0, np.inf), sigma=y_error_of_mean)
+                                      ones_160*distance_std))
+    
+    sigma = [10**(-6) if error == 0 else error for error in y_error]
+    popt, pcov = curve_fit(fit_model_curve, (), y_data, p0=(0.1, 0.1), bounds=(0, np.inf), sigma=sigma)
 
     #TODO, this needs to be fixed; using average to fit now
     alpha = 0.05 # 95% confidence interval = 100*(1-alpha)
@@ -51,8 +52,8 @@ def fit_model_curve(x: Sequence[float], *params):
 
     return np.concatenate((sim.angle["ABa_dorsal"], 
                             sim.angle["ABp_dorsal"],
-                            sim.angle["ABa_anterior"],
-                            sim.angle["ABp_anterior"],
+                            sim.angle["ABa_ant"],
+                            sim.angle["ABp_ant"],
                             sim.distance["12"],
                             sim.distance["23"],
                             sim.distance["34"],

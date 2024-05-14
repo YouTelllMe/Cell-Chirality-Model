@@ -18,8 +18,3 @@ GET_VELOCITY = ModelABp2.get_velocity
 
 # MODEL EXTENDING SPRING, Cell Wall Velocity
 # GET_VELOCITY = ModelESFriction.get_velocity
-
-
-#====================== 3 parameter models ======================
-
-GET_VELOCITY_3P = ModelAB.get_velocity

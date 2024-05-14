@@ -34,10 +34,10 @@ def plot_data():
     distances = pd.read_excel("distances.xlsx")
     angles = pd.read_excel("angles.xlsx")
     output = pd.read_excel("output.xlsx")
-    ABa_dorsal = pd.read_excel("./data/data_ABa_dorsal.xlsx").drop(["t"], axis=1, inplace=True)
-    ABp_dorsal = pd.read_excel("./data/data_ABp_dorsal.xlsx").drop(["t"], axis=1, inplace=True)
-    ABa_ant = pd.read_excel("./data/data_ABa_ant.xlsx").drop(["t"], axis=1, inplace=True)
-    ABp_ant = pd.read_excel("./data/data_ABp_ant.xlsx").drop(["t"], axis=1, inplace=True)
+    ABa_dorsal = pd.read_excel("./data/data_ABa_dorsal.xlsx").drop(["t"], axis=1)
+    ABp_dorsal = pd.read_excel("./data/data_ABp_dorsal.xlsx").drop(["t"], axis=1)
+    ABa_ant = pd.read_excel("./data/data_ABa_ant.xlsx").drop(["t"], axis=1)
+    ABp_ant = pd.read_excel("./data/data_ABp_ant.xlsx").drop(["t"], axis=1)
     data_stat = pd.read_excel("./data/data_stat.xlsx")
 
     fig, ((axX, axZ),(axDist, axDegree)) = plt.subplots(2, 2)
@@ -66,4 +66,5 @@ def fit_cortical_flow():
 
 
 if __name__ == "__main__":
-    fit() 
+    run(fit()[0])
+    plot_data()

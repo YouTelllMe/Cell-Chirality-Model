@@ -17,13 +17,13 @@ def plot_angles(ax: Axes,
 
     # plots model theta vs phi
     ax.plot(angles_df["ABa_dorsal"].to_numpy(), 
-                angles_df["ABa_anterior"].to_numpy(), 
+                angles_df["ABa_ant"].to_numpy(), 
                 "-o", 
                 markersize=2, 
                 c="blue")
     
     ax.plot(angles_df["ABp_dorsal"].to_numpy(), 
-                angles_df["ABp_anterior"].to_numpy(), 
+                angles_df["ABp_ant"].to_numpy(), 
                 "-o", 
                 markersize=2, 
                 c="red")

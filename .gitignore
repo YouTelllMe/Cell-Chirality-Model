@@ -2,7 +2,7 @@ venv/
 data/
 other/
 __pycache__/
-model_output/
+src/output
 model_plot/
 model_plot_prev/
 old/

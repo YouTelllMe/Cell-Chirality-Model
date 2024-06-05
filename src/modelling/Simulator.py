@@ -65,7 +65,7 @@ class Simulator:
         """
         arccos returns in range [0,pi]
 
-        Note, for the computation of angles, see data diagrams for reference.
+        Note, for the computation of angles, see data diagrams for reference. 
         """
         if self.df.empty:
             raise(Exception("DataFrame not Found."))
@@ -73,30 +73,34 @@ class Simulator:
 
         # location of "0" degrees, used to dot with axis vectors to obtain angle
 
-        ABa = pd.DataFrame(data={"x": self.df['0']-self.df['3'],
-                                 "y": self.df['1']-self.df['4'],
-                                 "z": self.df['2']-self.df['5']})
-        ABp = pd.DataFrame(data={"x": self.df['6']-self.df['9'],
+        axis_1to2 = pd.DataFrame(data={"x": self.df['3']-self.df['0'],
+                                 "y": self.df['4']-self.df['1'],
+                                 "z": self.df['5']-self.df['2']})
+        axis_4to3 = pd.DataFrame(data={"x": self.df['6']-self.df['9'],
                                  "y": self.df['7']-self.df['10'],
                                  "z": self.df['8']-self.df['11']})
         
-        ABa['-x'] = -ABa['x']
-        ABp['-y'] = -ABp['y']
+
+        # anterior needs 2 to 1, 3 to 4 to dot with (1,0)
+        axis_1to2['-y'] = -axis_1to2['y']
+        axis_4to3['-y'] = -axis_4to3['y']
+        axis_1to2['-z'] = -axis_1to2['z']
+        axis_4to3['-z'] = -axis_4to3['z']
 
         #dorsal view ; dorsal view is top down; (x,y), (-1,0) is 0 degrees. Use dot product rule to obtain. 
         #-ABa['-x'] because the axis should be position 2 - position 1
-        self.angle['ABa_dorsal'] = np.arccos(-ABa['-x']/np.sqrt(ABa['x']**2 + ABa['y']**2)) * 180 / np.pi
-        self.angle['ABp_dorsal'] = np.arccos(-ABp['x']/np.sqrt(ABp['x']**2 + ABp['y']**2)) * 180 / np.pi
+        self.angle['ABa_dorsal'] = np.arccos(-axis_1to2['x']/np.sqrt(axis_1to2['x']**2 + axis_1to2['y']**2)) * 180 / np.pi
+        self.angle['ABp_dorsal'] = np.arccos(-axis_4to3['x']/np.sqrt(axis_4to3['x']**2 + axis_4to3['y']**2)) * 180 / np.pi
 
         #anterior view ; anterior view is from the front; (y,z), (1,0) is 0 degrees. Dot with (1,0)
-        self.angle['ABa_ant'] = np.arccos(ABa['y']/np.sqrt(ABa['y']**2 + ABa['z']**2)) * 180 / np.pi
-        self.angle['ABp_ant'] = np.arccos(ABp['-y']/np.sqrt(ABp['y']**2 + ABp['z']**2)) * 180 / np.pi
-
+        self.angle['ABa_ant'] = np.arccos(axis_1to2['-y']/np.sqrt(axis_1to2['y']**2 + axis_1to2['z']**2)) * 180 / np.pi
+        self.angle['ABp_ant'] = np.arccos(axis_4to3['-y']/np.sqrt(axis_4to3['y']**2 + axis_4to3['z']**2)) * 180 / np.pi
+        
         # print(self.angle.head())
         for i in range(len(self.angle.index)):
             # print(ABa.at[i,'z'])
-            if ABa.at[i,'z'] < 0:
+            if axis_1to2.at[i,'-z'] < 0:
                 self.angle.at[i,'ABa_ant'] *= -1
-            if ABp.at[i,'z'] < 0:
+            if axis_4to3.at[i,'-z'] < 0:
                 self.angle.at[i,'ABp_ant'] *= -1
         

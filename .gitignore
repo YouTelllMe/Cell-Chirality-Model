@@ -2,14 +2,12 @@ venv/
 data/
 other/
 __pycache__/
-src/output
-model_plot/
-model_plot_prev/
+src/output/
 old/
 2-cell/
 4-cell/
 *.csv
-src/*.png
+*.png
 *.xlsx
 utils.py
 results/
